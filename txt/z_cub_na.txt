@@ -210,3 +210,201 @@ select a.gno,a.processno procno ,a.processs,a.gen,a.datea
 ,round(a.hours,2) hours,round(a.mans,2) mans
 ,round(a.rate,2) rate,cast(a.value as nvarchar)+' %' value
 from @tmp a order by a.processno,a.gno,a.datea;
+
+----------------------------------------------------------------------------------------
+z_cub_na04:--z_cub_na04
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bproc nvarchar(30)
+declare @t_eproc nvarchar(30)
+declare @t_bpno nvarchar(30)
+declare @t_epno nvarchar(30)
+declare @t_showover nvarchar(30)
+declare @t_shownowork nvarchar(30)
+declare @t_showdiff nvarchar(30)
+
+set @t_bdate = case when '#non' = [5] then '' else [5] end
+set @t_edate = case when '#non' = [6] then char(255) else [6] end
+set @t_bproc = case when '#non' = [7] then '' else [7] end
+set @t_eproc = case when '#non' = [8] then char(255) else [8] end
+set @t_bpno = case when '#non' = [9] then '' else [9] end
+set @t_epno = case when '#non' = [10] then char(255) else [10] end
+set @t_showover = case when '#non' = [11] then '' else [11] end
+set @t_shownowork = case when '#non' = [12] then '' else [12] end
+set @t_showdiff = case when '#non' = [13] then '' else [13] end
+
+declare @tmp table(
+	gno nvarchar(10),
+	accy nvarchar(10),
+	processno nvarchar(90),
+	processs nvarchar(max),
+	gen float,
+	datea nvarchar(10),
+	noa nvarchar(50),
+	noq nvarchar(10),
+	productno nvarchar(max),
+	mount float,
+	inmount float,
+	unit nvarchar(15),
+	hours float,
+	mans float,
+	rate float,
+	value float
+)
+
+insert @tmp
+select '0'gno,a.accy,isnull(b.processno,''),b.process
+,isnull(d.gen,c.hours),b.date2,a.noa,b.noq,a.productno,b.mount,0 inmount,a.unit
+,b.mount*case when isnull(c.minutes,0)>0 then c.minutes/60 else c.sec/60/60 end hours
+,isnull(f.minutes,0) mans,0 rate,0 value
+from view_cub a left join view_cubs b on a.noa=b.noa
+left join process c on b.processno=c.noa
+outer apply (select top 1 * from view_cugt where datea=a.datea and stationno=b.processno)d
+left join uca e on a.productno=e.noa
+outer apply(
+		select sum(borntime+addtime) minutes
+		from view_cuw cuw left join view_cuws cuws on (cuw.noa=cuws.noa)
+		where (b.processno=cuw.stationno) and (a.datea=cuw.datea)
+) f
+where b.date2 between @t_bdate and @t_edate
+and b.processno between @t_bproc and @t_eproc
+and a.productno between @t_bpno and @t_epno
+
+insert into @tmp(gno,processno,processs,datea,gen,mount,hours,mans)
+select '1' gno,a.processno,a.processs,char(255),avg(a.gen),sum(a.mount),sum(a.hours),sum(a.mans)
+from @tmp a group by a.processno,a.processs
+	
+update a
+set rate=b.gen-a.hours
+from @tmp a outer apply (select SUM(gen)gen from (select datea,gen from @tmp where gno='0' and processno=a.processno group by datea,gen)tmp)b
+where gno='1'
+
+if(@t_showdiff='1')
+begin
+	declare @datea nvarchar(10)
+	declare @processno nvarchar(50)
+	declare @processs nvarchar(90)
+	declare cursor_table cursor for
+		select datea,processno,processno from @tmp where (rate not between -0.5 and 0.5) and (gno='1')
+	open cursor_table
+	fetch next from cursor_table
+	into @datea,@processno,@processs
+	while(@@FETCH_STATUS <> -1)
+	begin
+		delete @tmp where (datea=@datea) and (processno=@processno) and (processs=@processs)
+		fetch next from cursor_table
+		into @datea,@processno,@processs
+	end
+	close cursor_table
+	deallocate cursor_table
+end
+
+update @tmp set value=(case when gen=0 then 0 else round((hours/gen)*100,2) end)
+
+insert into @tmp(gno,processno,processs,datea)
+select '2' gno,a.processno,a.processs,char(255) from @tmp a where gno='0' group by a.processno,a.processs
+	
+select a.gno,a.accy,a.processno procno,a.processs,a.gen,a.datea
+	,a.productno,a.noa,a.noq
+	,dbo.getComma(round(a.mount,2),-1) mount
+	,dbo.getComma(round(a.inmount,2),-1) inmount
+	,a.unit,round(a.hours,2) hours,round(a.mans,2) mans,round(a.rate,2) rate
+	,cast(a.value as nvarchar)+' %' value
+	,'cub_na?left(noa,'+cast(len(a.noa) as nvarchar)+')=$noa?'+a.accy qhref
+from @tmp a order by a.processno,a.datea,a.gno;
+----------------------------------------------------------------------------------------
+z_cub_na05:--z_cub_na05
+declare @t_rlen nvarchar(10)
+declare @t_saturday nvarchar(10)
+declare @t_proj nvarchar(30)
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bproc nvarchar(30)
+declare @t_eproc nvarchar(30)
+declare @t_bpno nvarchar(30)
+declare @t_epno nvarchar(30)
+declare @t_showover nvarchar(30)
+declare @t_shownowork nvarchar(30)
+declare @t_showdiff nvarchar(30)
+
+set @t_rlen = case when '#non' = [2] then '' else [2] end
+set @t_saturday = case when '#non' = [3] then '' else [3] end
+set @t_proj = case when '#non' = [4] then '' else [4] end
+set @t_bdate = case when '#non' = [5] then '' else [5] end
+set @t_edate = case when '#non' = [6] then char(255) else [6] end
+set @t_bproc = case when '#non' = [7] then '' else [7] end
+set @t_eproc = case when '#non' = [8] then char(255) else [8] end
+set @t_bpno = case when '#non' = [9] then '' else [9] end
+set @t_epno = case when '#non' = [10] then char(255) else [10] end
+set @t_showover = case when '#non' = [11] then '' else [11] end
+set @t_shownowork = case when '#non' = [12] then '' else [12] end
+set @t_showdiff = case when '#non' = [13] then '' else [13] end
+
+--105/06/29 改成 已預交日顯示
+declare @tmp table(
+	gno nvarchar(10),
+	datea nvarchar(10),
+	productno nvarchar(200),
+	product nvarchar(max),
+	value float,
+	workmount float
+)
+
+insert into @tmp
+select '0' gno,b.datea,b.productno,b.product,sum(b.mount),isnull(c.mount,0)
+from view_orde a left join view_ordes b on (a.noa=b.noa)
+outer apply (select sum(mount)mount from view_cub where productno=b.productno and edate=b.datea )c
+where (b.datea between @t_bdate and @t_edate) 
+and (b.productno between @t_bpno and @t_epno)
+group by b.datea,b.productno,b.product,c.mount
+order by b.datea
+
+select a.gno,a.datea,a.productno,a.product,a.value,a.workmount
+from @tmp a
+order by a.productno,a.datea;
+----------------------------------------------------------------------------------------
+z_cub_na06:--z_cub_na06
+declare @t_rlen nvarchar(10)
+declare @t_saturday nvarchar(10)
+declare @t_proj nvarchar(30)
+declare @t_bdate nvarchar(30)
+declare @t_edate nvarchar(30)
+declare @t_bproc nvarchar(30)
+declare @t_eproc nvarchar(30)
+declare @t_bpno nvarchar(30)
+declare @t_epno nvarchar(30)
+declare @t_showover nvarchar(30)
+declare @t_shownowork nvarchar(30)
+declare @t_showdiff nvarchar(30)
+
+set @t_rlen = case when '#non' = [2] then '' else [2] end
+set @t_saturday = case when '#non' = [3] then '' else [3] end
+set @t_proj = case when '#non' = [4] then '' else [4] end
+set @t_bdate = case when '#non' = [5] then '' else [5] end
+set @t_edate = case when '#non' = [6] then char(255) else [6] end
+set @t_bproc = case when '#non' = [7] then '' else [7] end
+set @t_eproc = case when '#non' = [8] then char(255) else [8] end
+set @t_bpno = case when '#non' = [9] then '' else [9] end
+set @t_epno = case when '#non' = [10] then char(255) else [10] end
+set @t_showover = case when '#non' = [11] then '' else [11] end
+set @t_shownowork = case when '#non' = [12] then '' else [12] end
+set @t_showdiff = case when '#non' = [13] then '' else [13] end
+
+declare @tmp table( 
+	gno nvarchar(10), 
+	datea nvarchar(10), 
+	productno nvarchar(200), 
+	product nvarchar(max), 
+	value float 
+) 
+
+insert into @tmp 
+select '0' gno,b.date2,a.productno,a.product,sum(a.mount) 
+from view_cub a outer apply (select MIN(date2)date2 from view_cubs where noa=a.noa and isnull(date2,'')!='')b
+where (b.date2 between @t_bdate and @t_edate) 
+and (a.productno between @t_bpno and @t_epno) 
+group by b.date2,a.productno,a.product order by b.date2 
+
+select a.gno,a.datea,a.productno,a.product,a.value 
+from @tmp a order by a.productno,a.datea 
+;

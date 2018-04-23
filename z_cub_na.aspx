@@ -14,6 +14,7 @@
 		<script src="css/jquery/ui/jquery.ui.core.js"> </script>
 		<script src="css/jquery/ui/jquery.ui.widget.js"> </script>
 		<script src="css/jquery/ui/jquery.ui.datepicker_tw.js"> </script>
+		<script src='../script/clipboard.min.js' type="text/javascript"> </script>
 		<script type="text/javascript">
 			var DayName = ['週日','週一','週二','週三','週四','週五','週六'];
 			if (location.href.indexOf('?') < 0) {
@@ -85,7 +86,7 @@
                 }
                 
                 $('#q_report').click(function(){
-					var ChartShowIndex = [0,1];
+					var ChartShowIndex = [0,1,4,5];
 					var parent=document.getElementById("chart");
 					if($('#q_report').data('info').radioIndex != clickIndex){
 						$('#frameReport').html('');
@@ -108,6 +109,11 @@
 							}
 						}
 						clickIndex = $('#q_report').data('info').radioIndex;
+						if(t_index==4){
+							$('#lblXdate').text('預交日');
+						}else{
+							$('#lblXdate').text(q_getMsg('lblXdate'));
+						}
 					}
 				});
                 
@@ -626,6 +632,270 @@
 							OutHtml += "</table>"
 							var t_totalWidth = 0;
 							t_totalWidth = 690+((70+2)*(DateObj.length+1+2))+10;
+							$('#chart').css('width',t_totalWidth+'px').html(OutHtml);
+						}
+						break;
+					case 'qtxt.query.z_cub_na05':
+						var as = _q_appendData('tmp0','',true,true);
+						if (as[0] == undefined) {
+							alert('沒有資料!!');
+						}else{
+							var t_bdate = $.trim($('#txtXdate1').val());
+							var t_edate = $.trim($('#txtXdate2').val());
+							t_bdate = (t_bdate.length>=9?t_bdate:q_date());
+							var t_bADdate = r_len==3?(dec(t_bdate.substring(0,3))+1911)+t_bdate.substr(3):t_bdate;
+							var t_edate = $.trim($('#txtXdate2').val());
+							t_edate = (t_edate.length>=9?t_edate:q_date());
+							var t_eADdate = r_len==3?(dec(t_edate.substring(0,3))+1911)+t_edate.substr(3):t_edate;
+							var myStartDate = new Date(t_bADdate);
+							var myEndDate = new Date(t_eADdate);
+							var DiffDays = ((myEndDate - myStartDate)/ 86400000);
+							var DateList = [];
+							var DateObj = [];
+							for(var j=0;j<=DiffDays;j++){
+								var thisDay = q_cdn(t_bdate,j);
+								var thisADday = r_len==3?dec(thisDay.substring(0,3))+1911+thisDay.substr(3):thisDay;
+								if((new Date(thisADday).getDay())!=0){
+									DateList.push(thisDay);
+									DateObj.push({
+										datea:thisDay,
+										value:0,
+										workmount:0
+									});
+								}
+							}
+							var TL = [];
+							var OutHtml= '<table id="tTable" border="1px" cellpadding="0" cellspacing="0">';
+							for(var i=0;i<as.length;i++){
+								var isFind = false;
+								for(var j=0;j<TL.length;j++){
+									if((as[i].productno==TL[j].productno)){
+										isFind = true;
+									}
+								}
+								if(!isFind){
+									TL.push({
+										productno : as[i].productno,
+										product : as[i].product,
+										datea : []
+									});
+								}
+							}
+							for(var k=0;k<TL.length;k++){
+								for(var j=0;j<DateList.length;j++){
+									TL[k].datea.push([DateList[j],0/*mount*/,0/*workmount*/]);
+								}
+							}
+							for(var k=0;k<as.length;k++){
+								isFind = false;
+								for(var j=0;j<TL.length;j++){
+									if(isFind) break;
+									if((as[k].productno==TL[j].productno)){
+										var TLDatea = TL[j].datea;
+										for(var h=0;h<TLDatea.length;h++){
+											if(as[k].datea==TLDatea[h][0]){
+												TLDatea[h][1] = dec(TLDatea[h][1])+dec(as[k].value);
+												TLDatea[h][2] = dec(TLDatea[h][2])+dec(as[k].workmount);
+												isFind = true;
+												break;
+											}
+										}
+									}
+								}
+							}
+							OutHtml += '<tr>';
+							OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>";
+							OutHtml += "<td class='tTitle' style='width:80px;' rowspan='2'></td>";
+							var tmpTd = '<tr>';
+							for(var j=0;j<DateList.length;j++){
+								var thisDay = DateList[j];
+								var thisADday = r_len==3?dec(thisDay.substring(0,3))+1911+thisDay.substr(3):thisDay;
+								OutHtml += "<td class='tTitle tWidth'>" + thisDay.substr(r_len+1) + "</td>";
+								tmpTd += "<td class='tTitle tWidth'>" + DayName[(new Date(thisADday).getDay())] + "</td>";
+							}
+							OutHtml += "<td class='tTitle tWidth' rowspan='2'>小計</td>";
+							tmpTd += "</tr>"
+							OutHtml += '</tr>' + tmpTd;
+							var ATotal = 0,wATotal = 0;
+							for(var k=0;k<TL.length;k++){
+								OutHtml += '<tr>';
+								OutHtml += "<td class='Lproduct' style='width:150px;' rowspan='2'>" + TL[k].productno + "</td><td class='Lproduct' style='width:220px;' rowspan='2'>" + TL[k].product + "</td>";
+								var TTD = TL[k].datea;
+								var tTotal = 0;
+								var wTotal = 0;
+								OutHtml += "<td class='center subTitle' style='width:80px;'>訂單數量</td>";
+								for(var j=0;j<TTD.length;j++){
+									tTotal = q_add(tTotal,round(TTD[j][1],3));
+									DateObj[j].value = q_add(dec(DateObj[j].value),round(TTD[j][1],3));
+									OutHtml += "<td class='num'>" + (round(TTD[j][1],0)==0 && TTD[j][1]>0?round(TTD[j][1],2):Zerospaec(round(TTD[j][1],0))) + "</td>";
+								}
+								ATotal = q_add(ATotal,tTotal);
+								OutHtml += "<td class='num'>" + Zerospaec(tTotal) + "</td>";
+								OutHtml += '</tr>';
+								OutHtml += '<tr id="chgTitle">';
+								OutHtml += "<td class='center subTitle' style='width:80px;'>排程數量</td>";
+								for(var j=0;j<TTD.length;j++){
+									wTotal = q_add(wTotal,round(TTD[j][2],3));
+									DateObj[j].workmount = q_add(dec(DateObj[j].workmount),round(TTD[j][2],3));
+									OutHtml += "<td class='num'>" + (round(TTD[j][2],0)==0 && TTD[j][2]>0?round(TTD[j][2],2):Zerospaec(round(TTD[j][2],0))) + "</td>";
+								}
+								wATotal = q_add(wATotal,wTotal);
+								OutHtml += "<td class='num'>" + (round(wTotal,0)==0 && wTotal>0?round(wTotal,2):Zerospaec(round(wTotal,0))) + "</td>";
+								OutHtml += '</tr>';
+								
+								if(k%20==0 && k!=0){
+									OutHtml += '<tr>';
+									OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>";
+									OutHtml += "<td class='tTitle' style='width:80px;' rowspan='2'></td>";
+									var tmpTd = '<tr>';
+									for(var j=0;j<DateList.length;j++){
+										var thisDay = DateList[j];
+										var thisADday = r_len==3?dec(thisDay.substring(0,3))+1911+thisDay.substr(3):thisDay;
+										OutHtml += "<td class='tTitle tWidth'>" + thisDay.substr(r_len+1) + "</td>";
+										tmpTd += "<td class='tTitle tWidth'>" + DayName[(new Date(thisADday).getDay())] + "</td>";
+									}
+									OutHtml += "<td class='tTitle tWidth' rowspan='2'>小計</td>";
+									tmpTd += "</tr>"
+									OutHtml += '</tr>' + tmpTd;
+								}
+
+							}
+							OutHtml += "<tr><td colspan='2' rowspan='2' class='tTotal num'>總計：</td>";
+							OutHtml += "<td class='center tTotal' style='width:80px;'>訂單數量</td>";
+							for(var k=0;k<DateObj.length;k++){
+								OutHtml += "<td class='tTotal num'>" + (round(DateObj[k].value,0)==0 && DateObj[k].value>0?round(DateObj[k].value,2):Zerospaec(round(DateObj[k].value,0))) + "</td>";
+							}
+							OutHtml += "<td class='tTotal num'>" + Zerospaec(round(ATotal,3)) + "</td></tr>";
+							OutHtml += "<tr>";
+							OutHtml += "<td class='center tTotal' style='width:80px;'>排程數量</td>";
+							for(var k=0;k<DateObj.length;k++){
+								OutHtml += "<td class='tTotal num'>" + (round(DateObj[k].workmount,0)==0 && DateObj[k].workmount>0?round(DateObj[k].workmount,2):Zerospaec(round(DateObj[k].workmount,0))) + "</td>";
+							}
+							OutHtml += "<td class='tTotal num'>" + (round(wATotal,0)==0 && wATotal>0?round(wATotal,2):Zerospaec(round(wATotal,0))) + "</td>";
+							
+							OutHtml += "</tr></table>"
+							var t_totalWidth = 0;
+							t_totalWidth = 660+((70+2)*(DateObj.length+1+2))+10;
+							$('#chart').css('width',t_totalWidth+'px').html(OutHtml);
+						}
+						break;
+					case 'qtxt.query.z_cub_na06':
+						var as = _q_appendData('tmp0','',true,true);
+						if (as[0] == undefined) {
+							alert('沒有資料!!');
+						}else{
+							var t_bdate = $.trim($('#txtXdate1').val());
+							var t_edate = $.trim($('#txtXdate2').val());
+							t_bdate = (t_bdate.length>=9?t_bdate:q_date());
+							var t_bADdate = r_len==3?(dec(t_bdate.substring(0,3))+1911)+t_bdate.substr(3):t_bdate;
+							var t_edate = $.trim($('#txtXdate2').val());
+							t_edate = (t_edate.length>=9?t_edate:q_date());
+							var t_eADdate = r_len==3?(dec(t_edate.substring(0,3))+1911)+t_edate.substr(3):t_edate;
+							var myStartDate = new Date(t_bADdate);
+							var myEndDate = new Date(t_eADdate);
+							var DiffDays = ((myEndDate - myStartDate)/ 86400000);
+							var DateList = [];
+							var DateObj = [];
+							for(var j=0;j<=DiffDays;j++){
+								var thisDay = q_cdn(t_bdate,j);
+								var thisADday = r_len==3?dec(thisDay.substring(0,3))+1911+thisDay.substr(3):thisDay;
+								if((new Date(thisADday).getDay())!=0){
+									DateList.push(thisDay);
+									DateObj.push({
+										datea:thisDay,
+										value:0
+									});
+								}
+							}
+							var TL = [];
+							var OutHtml= '<table id="tTable" border="1px" cellpadding="0" cellspacing="0">';
+							for(var i=0;i<as.length;i++){
+								var isFind = false;
+								for(var j=0;j<TL.length;j++){
+									if((as[i].productno==TL[j].productno)){
+										isFind = true;
+									}
+								}
+								if(!isFind){
+									TL.push({
+										productno : as[i].productno,
+										product : as[i].product,
+										datea : []
+									});
+								}
+							}
+							for(var k=0;k<TL.length;k++){
+								for(var j=0;j<DateList.length;j++){
+									TL[k].datea.push([DateList[j],0/*mount*/
+									]);
+								}
+							}
+							for(var k=0;k<as.length;k++){
+								isFind = false;
+								for(var j=0;j<TL.length;j++){
+									if(isFind) break;
+									if((as[k].productno==TL[j].productno)){
+										var TLDatea = TL[j].datea;
+										for(var h=0;h<TLDatea.length;h++){
+											if(as[k].datea==TLDatea[h][0]){
+												TLDatea[h][1] = dec(TLDatea[h][1])+dec(as[k].value);
+												isFind = true;
+												break;
+											}
+										}
+									}
+								}
+							}
+							OutHtml += '<tr>';
+							OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>";
+							var tmpTd = '<tr>';
+							for(var j=0;j<DateList.length;j++){
+								var thisDay = DateList[j];
+								var thisADday = r_len==3?dec(thisDay.substring(0,3))+1911+thisDay.substr(3):thisDay;
+								OutHtml += "<td class='tTitle tWidth'>" + thisDay.substr(r_len+1) + "</td>";
+								tmpTd += "<td class='tTitle tWidth'>" + DayName[(new Date(thisADday).getDay())] + "</td>";
+							}
+							OutHtml += "<td class='tTitle tWidth' rowspan='2'>小計</td>";
+							tmpTd += "</tr>"
+							OutHtml += '</tr>' + tmpTd;
+							var ATotal = 0,wATotal = 0;
+							for(var k=0;k<TL.length;k++){
+								OutHtml += '<tr>';
+								OutHtml += "<td class='Lproduct' style='width:150px;'>" + TL[k].productno + "</td><td class='Lproduct' style='width:220px;'>" + TL[k].product + "</td>";
+								var TTD = TL[k].datea;
+								var tTotal = 0;
+								for(var j=0;j<TTD.length;j++){
+									tTotal = q_add(tTotal,round(TTD[j][1],3));
+									DateObj[j].value = q_add(dec(DateObj[j].value),round(TTD[j][1],3));
+									OutHtml += "<td class='num'>" + (round(TTD[j][1],0)==0 && TTD[j][1]>0?round(TTD[j][1],2):Zerospaec(round(TTD[j][1],0))) + "</td>";
+								}
+								ATotal = q_add(ATotal,tTotal);
+								OutHtml += "<td class='num'>" + (round(tTotal,0)==0 && tTotal>0?round(tTotal,2):Zerospaec(round(tTotal,0))) + "</td>";
+								OutHtml += '</tr>';
+								
+								if(k%20==0 && k!=0){
+									OutHtml += '<tr>';
+									OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>";
+									var tmpTd = '<tr>';
+									for(var j=0;j<DateList.length;j++){
+										var thisDay = DateList[j];
+										var thisADday = r_len==3?dec(thisDay.substring(0,3))+1911+thisDay.substr(3):thisDay;
+										OutHtml += "<td class='tTitle tWidth'>" + thisDay.substr(r_len+1) + "</td>";
+										tmpTd += "<td class='tTitle tWidth'>" + DayName[(new Date(thisADday).getDay())] + "</td>";
+									}
+									OutHtml += "<td class='tTitle tWidth' rowspan='2'>小計</td>";
+									tmpTd += "</tr>"
+									OutHtml += '</tr>' + tmpTd;
+								}
+							}
+							OutHtml += "<tr><td colspan='2' class='tTotal num'>總計：</td>";
+							for(var k=0;k<DateObj.length;k++){
+								OutHtml += "<td class='tTotal num'>" + (round(DateObj[k].value,0)==0 && DateObj[k].value>0?round(DateObj[k].value,2):Zerospaec(round(DateObj[k].value,0))) + "</td>";
+							}
+							OutHtml += "<td class='tTotal num'>" + (round(ATotal,0)==0 && ATotal>0?round(ATotal,2):Zerospaec(round(ATotal,0))) + "</td>";
+							OutHtml += "</table>"
+							var t_totalWidth = 0;
+							t_totalWidth = 660+((70+2)*(DateObj.length+1+2))+10;
 							$('#chart').css('width',t_totalWidth+'px').html(OutHtml);
 						}
 						break;

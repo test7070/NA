@@ -548,10 +548,6 @@
 				sum();
 				
 				for (var i = 0; i < q_bbtCount; i++) {
-					if(!emp($('#txtProductno__'+i).val()) && emp($('#txtStoreno__'+i).val())){
-						$('#txtStoreno__'+i).val('A');
-						$('#txtStore__'+i).val('工廠倉');
-					}
 					$('#txtGmount__'+i).val($('#txtMount__'+i).val());
 				}
 				
@@ -614,13 +610,11 @@
 					$('#btnUpdata').attr('disabled', 'disabled');
 					$('#btnOrdes').attr('disabled', 'disabled');
 					$("[name='checkCut']").attr('disabled', 'disabled');
-					$('#btnQrcode').removeAttr('disabled');
 					$('#btnCugt2').removeAttr('disabled');
 				}else{
 					$('#btnUpdata').removeAttr('disabled');
 					$('#btnOrdes').removeAttr('disabled');
 					$("[name='checkCut']").removeAttr('disabled');
-					$('#btnQrcode').attr('disabled', 'disabled');
 					$('#btnCugt2').attr('disabled', 'disabled');
 				}
 			}
