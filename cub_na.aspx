@@ -37,9 +37,10 @@
 			aPop = new Array(
 				['txtOrdeno', '', 'view_ordes', 'noa,no2,productno,product,spec,mount,custno,comp,memo', 'txtOrdeno,txtNo2,txtProductno,txtProduct,txtSpec,txtMount,txtCustno,txtComp,txtMemo', ''],
 				['txtCustno', 'lblCust', 'cust', 'noa,nick,comp,tel,invoicetitle', 'txtCustno,txtComp', 'cust_b.aspx'],
-				['txtProductno', 'lblProduct', 'ucc', 'noa,product,style,spec,unit', 'txtProductno,txtProduct,style,txtSpec,txtUnit', 'ucaucc_b.aspx'],
+				['txtProductno', 'lblProduct', 'uca', 'noa,product,unit', 'txtProductno,txtProduct,txtUnit', 'ucaucc_b.aspx'],
 				['txtTggno_', '', 'tgg', 'noa,nick', 'txtTggno_,txtTgg_', ""],
 				['txtProcessno_', 'btnProcessno_', 'station', 'noa,station', 'txtProcessno_,txtProcess_', 'station_b.aspx'],
+				['txtProductno2_', 'btnProductno2_', 'mech', 'noa,mech', 'txtProductno2_,txtProduct2_', 'mech_b.aspx'],
 				['txtProductno__', 'btnProductno__', 'ucc', 'noa,product,spec,unit', 'txtProductno__,txtProduct__,txtSpec__,txtUnit__', 'ucaucc_b.aspx'],
 				['txtStoreno__', 'btnStoreno__', 'store', 'noa,store', 'txtStoreno__,txtStore__', 'store_b.aspx']
 				,['textCugtbstationno', '', 'station', 'noa,station', 'textCugtbstationno', ''],['textCugtestationno', '', 'station', 'noa,station', 'textCugtestationno', '']
@@ -79,6 +80,8 @@
 				,['txtMo', 15, 0, 1],['txtW02', 15, 0, 1],['txtW01', 15, 0, 1],['txtW03', 4, 0, 1],['txtWmount', 15, q_getPara('vcc.mountPrecision'), 1]];
 				bbtNum = [['txtGmount', 15, q_getPara('vcc.mountPrecision'), 1]];
 				q_mask(bbmMask);
+				
+				q_cmbParse("cmbTypea", 'M@M.一般鋼管,S@S.代工鋼管,K@K.樣品,D@D.研發,V@V.越南生產');
 				
 				document.title='連續製令單'
 				
@@ -240,7 +243,7 @@
 								t_where+=" or noa='"+t_stationno+"'";
 							}
 						}
-						t_where="where=^^ "+t_where " ^^";
+						t_where="where=^^ "+t_where+" ^^";
 						q_gt('station', t_where, 0, 0, 0, "getstation",r_accy,1);
 						var tstation = _q_appendData("station", "", true);
 						var t_bdate=$('#txtBdate').val();
@@ -797,6 +800,32 @@
 						}
 					}
 				});
+				
+				$('.needs').each(function(index) {
+					$(this).unbind('change');
+					$(this).change(function() {
+						var n=$(this).attr('id').split('__')[1];
+						var t_need='';
+						for(var k=1;k<=8;k++){
+							t_need=t_need+'@,#'+$('#textNeed'+k+'_'+n).val();
+						}
+						
+						$('#txtNeed_'+n).val(t_need);
+					});
+				});
+				splitbbsf();
+			}
+			
+			function splitbbsf(){ //拆解bbs欄位
+				for (var i = 0; i < q_bbsCount; i++) {
+					//合併儲存
+					var tstr=$('#txtNeed_'+i).val().split('@,#');
+					if(tstr.length>1){
+						for(var k=1;k<=8;k++){
+							$('#textNeed'+k+'_'+i).val(tstr[k]);
+						}
+					}
+				}
 			}
 
 			function bbtAssign() {
@@ -905,6 +934,40 @@
 	        var orde_no2='',orde_pno='',orde_product='',orde_custno='',orde_comp='',orde_spec='',orde_pop=true;
 	        function q_popPost(s1) {
 			   	switch (s1) {
+			   		case 'txtProductno':
+			   			var t_pno=$('#txtProductno').val();
+			   			if(t_pno.length>0){
+				   			q_gt('uca', "where=^^ noa='" + t_pno + "' ^^", 0, 0, 0, "getuca",r_accy,1);
+							var as = _q_appendData("uca", "", true);
+							if(as[0]!=undefined){
+								$('#txtCustno').val(as[0].custno);
+								$('#txtComp').val(as[0].cust);
+								$('#txtM1').val(as[0].bdate);
+								$('#txtM2').val(as[0].size);
+								$('#txtM3').val(as[0].groupeno);
+								$('#txtM4').val(as[0].groupfno);
+								$('#txtM5').val(as[0].groupgno);
+								$('#txtM6').val(as[0].grouphno);
+								$('#txtM7').val(as[0].edate);
+								$('#txtM8').val(as[0].style);
+								$('#txtM9').val(as[0].groupino);
+								$('#txtM10').val(as[0].groupjno);
+								$('#txtM11').val(as[0].groupkno);
+								$('#txtM12').val(as[0].grouplno);
+							}
+							var as = _q_appendData("ucat", "", true)
+							if(as[0]!=undefined){
+								while(q_bbsCount<as.length){
+									$('#btnPlus').click();
+								}
+								for (var i = 0; i < q_bbsCount; i++) {
+									$('#btnMinus_'+i).click();
+								}
+								q_gridAddRow(bbsHtm, 'tbbs', 'txtProcessno,txtProcess'
+								, as.length, as, 'stationno,station', 'txtProcessno');
+							}
+						}
+			   			break;
 			   		case 'txtTggno_':
 			   			var t_n=b_seq;
 						q_gt('tgg', "where=^^ noa='" + $('#txtTggno_'+t_n).val() + "' ^^", 0, 0, 0, "gettggs",r_accy,1);
@@ -968,9 +1031,7 @@
 			.tbbm tr {
 				height: 35px;
 			}
-			.tbbm tr td {
-				width: 9%;
-			}
+			
 			.tbbm .tdZ {
 				width: 1%;
 			}
@@ -1138,20 +1199,19 @@
 			<div class='dbbm'>
 				<table class="tbbm" id="tbbm">
 					<tr style="height:1px;">
+						<td style="width: 95px;"> </td>
 						<td> </td>
+						<td style="width: 95px;"> </td>
 						<td> </td>
-						<td> </td>
-						<td> </td>
-						<td> </td>
-						<td> </td>
+						<td style="width: 95px;"> </td>
 						<td> </td>
 						<td class="tdZ"> </td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblDatea" class="lbl"> </a></td>
 						<td><input id="txtDatea" type="text" class="txt c1"/></td>
-						<!--<td><span> </span><a class="lbl">類別</a></td>
-						<td><select id="cmbTypea" class="txt c1"> </select></td>-->
+						<td><span> </span><a id="lblTypea" class="lbl">製令單別</a></td>
+						<td><select id="cmbTypea" class="txt c1"> </select></td>
 						<td><span> </span><a id="lblNoa" class="lbl"> </a></td>
 						<td><input id="txtNoa" type="text" class="txt c1"/></td>
 					</tr>
@@ -1173,39 +1233,85 @@
 						<td><span> </span><a id="lblProduct" class="lbl btn" >製成品</a></td>
 						<td><input id="txtProductno" type="text" class="txt c1"/></td>
 						<td colspan="2"><input id="txtProduct" type="text" class="txt c1"/></td>
-						<td><span> </span><a id="lblBdate_na" class="lbl" >預定開工日</a></td>
-						<td><input id="txtBdate" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblSpec" class="lbl" >規格</a></td>
-						<td colspan="3"><input id="txtSpec" type="text" class="txt c1"/></td>
-						<td><span> </span><a id="lblEdate_na" class="lbl" >預估完工日</a></td>
-						<td><input id="txtEdate" type="text" class="txt c1"/></td>
+						<td><span> </span><a id="lblM1_na" class="lbl">成品材質</a></td>
+						<td>
+							<input id="txtM1" type="text" class="txt c1" style="width:40%;"/>
+							<input id="txtM2" type="text" class="txt c1" style="width:55%;"/>
+						</td>
+						<td><span> </span><a id="lblM3_na" class="lbl" >短徑</a></td>
+						<td><input id="txtM3" type="text" class="txt c1 num" style="width:35%;"/>
+							<span style="float: left;margin-left: 15px;"> </span>
+							<a id="lblM4_na" class="lbl" style="float: left;">長徑</a>
+							<span style="float: left;"> </span>
+							<input id="txtM4" type="text" class="txt c1 num" style="width:35%;"/>
+						</td>
+						<td><span> </span><a id="lblM5_na" class="lbl" >厚度</a></td>
+						<td><input id="txtM5" type="text" class="txt c1 num" style="width:35%;"/>
+							<span style="float: left;margin-left: 15px;"> </span>
+							<a id="lblM6_na" class="lbl" style="float: left;">長度</a>
+							<span style="float: left;"> </span>
+							<input id="txtM6" type="text" class="txt c1 num" style="width:35%;"/>
+						</td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblMount" class="lbl" >數量</a></td>
+						<td><span> </span><a id="lblM7_na" class="lbl">素材材質</a></td>
+						<td>
+							<input id="txtM7" type="text" class="txt c1" style="width:40%;"/>
+							<input id="txtM8" type="text" class="txt c1" style="width:55%;"/>
+						</td>
+						<td><span> </span><a id="lblM9_na" class="lbl" >短徑</a></td>
+						<td><input id="txtM9" type="text" class="txt c1 num" style="width:35%;"/>
+							<span style="float: left;margin-left: 15px;"> </span>
+							<a id="lblM10_na" class="lbl" style="float: left;">長徑</a>
+							<span style="float: left;"> </span>
+							<input id="txtM10" type="text" class="txt c1 num" style="width:35%;"/>
+						</td>
+						<td><span> </span><a id="lblM11_na" class="lbl" >厚度</a></td>
+						<td><input id="txtM11" type="text" class="txt c1 num" style="width:35%;"/>
+							<span style="float: left;margin-left: 15px;"> </span>
+							<a id="lblM12_na" class="lbl" style="float: left;">長度</a>
+							<span style="float: left;"> </span>
+							<input id="txtM12" type="text" class="txt c1 num" style="width:35%;"/>
+						</td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblMount_na" class="lbl" >預計/支</a></td>
 						<td><input id="txtMount" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblUnit" class="lbl" >單位</a></td>
-						<td><input id="txtUnit" type="text" class="txt c1"/></td>
-						<td><span> </span><a id="lblPrice" class="lbl" >單價</a></td>
-						<td><input id="txtPrice" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblBdime_na" class="lbl" >數量/KG</a></td>
+						<td><input id="txtBdime" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblC1" class="lbl" >已交量</a></td>
+						<td><input id="txtC1" type="text" class="txt num c1"/></td>
 					</tr>
 					<tr>
+						<td><span> </span><a id="lblPrice_na" class="lbl" >單價</a></td>
+						<td><input id="txtPrice" type="text" class="txt num c1"/></td>
 						<td><span> </span><a id="lblMoney" class="lbl" >總計</a></td>
 						<td><input id="txtMo" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblNotv" class="lbl" >未交量</a></td>
+						<td><input id="txtNotv" type="text" class="txt num c1"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblIdime_na" class="lbl" >下料/支</a></td>
+						<td><input id="txtIdime" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblEdime_na" class="lbl" >產量/KG</a></td>
+						<td><input id="txtEdime" type="text" class="txt num c1"/></td>
 						<td><span> </span><a id="lblInano" class="lbl" >入庫單號</a></td>
 						<td><input id="textInano" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblC1" class="lbl" >已交量</a></td>
-						<td><input id="txtC1" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblNotv" class="lbl" >未交量</a></td>
-						<td><input id="txtNotv" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblBdate_na" class="lbl" >預定開工日</a></td>
+						<td><input id="txtBdate" type="text" class="txt c1"/></td>
+						<td><span> </span><a id="lblEdate_na" class="lbl" >預估完工日</a></td>
+						<td><input id="txtEdate" type="text" class="txt c1"/></td>
 						<td><input id="btnCugt2" type="button" value="產能批次調整" style="float:right;"/></td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblMemo" class="lbl" > </a></td>
-						<td colspan="5"><input id="txtMemo" type="text" class="txt c1"/></td>
+						<td><span> </span><a id="lblMemo2_na" class="lbl">特殊要求</a></td>
+						<td><input id="txtMemo2" type="text" class="txt c1"/></td>
+						<td><span> </span><a id="lblMemo" class="lbl"> </a></td>
+						<td colspan="3"><input id="txtMemo" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblWorker" class="lbl" > </a></td>
@@ -1230,9 +1336,21 @@
 				<tr style='color:white; background:#003366;' >
 					<td style="width:20px;"><input id="btnPlus" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
 					<td style="width:20px;"> </td>
-					<td style="width:150px;"><a id='lblProcess_na_s'>製程名稱</a></td>
+					<td style="width:150px;"><a id='lblProcess_na_s'>製程</a></td>
 					<td style="width:40px;"><a id='lblCugt_na_s'>產能編制</a></td>
-					<td style="width:100px;"><a id='lblDate2_na_s'>指定開工日</a></td>
+					<td style="width:60px;"><a id='lblNeed1_na_s'>製程備註1</a></td>
+					<td style="width:60px;"><a id='lblNeed2_na_s'>製程備註2</a></td>
+					<td style="width:60px;"><a id='lblNeed3_na_s'>製程備註3</a></td>
+					<td style="width:60px;"><a id='lblNeed4_na_s'>製程備註4</a></td>
+					<td style="width:60px;"><a id='lblNeed5_na_s'>製程備註5</a></td>
+					<td style="width:60px;"><a id='lblNeed6_na_s'>製程備註6</a></td>
+					<td style="width:60px;"><a id='lblNeed7_na_s'>製程備註7</a></td>
+					<td style="width:60px;"><a id='lblNeed8_na_s'>製程備註8</a></td>
+					<td style="width:150px;"><a id='lblProductno2_na_s'>機台</a></td>
+					<td style="width:50px;"><a id='lblHmount_na_s'>工時</a></td>
+					<td style="width:50px;"><a id='lblEnda_na_s'>完工</a></td>
+					
+					<!--<td style="width:100px;"><a id='lblDate2_na_s'>指定開工日</a></td>
 					<td style="width:80px;"><a id='lblWmount_na_s'>已入庫數</a></td>
 					<td style="width:140px;"><a id='lblTgg_na_s'>廠商簡稱</a></td>
 					<td style="width:80px;"><a id='lblMount_na_s'>請款數量</a></td>
@@ -1242,27 +1360,44 @@
 					<td style="width:40px;"><a id='lblSale_na_s'>外加稅</a></td>
 					<td style="width:100px;"><a id='lblTxa_na_s'>稅金</a></td>
 					<td style="width:100px;"><a id='lblW01_na_s'>總金額</a></td>
-					<td style="width:130px;"><a id='lblNeed_na_s'>製造要求</a><BR><a id='lblMemo_na_s'>備註</a></td>
+					<td style="width:130px;"><a id='lblMemo_na_s'>備註</a></td>
 					<td style="width:40px;">
 						<a id='lblPay_na_s'>請款</a>
 						<input name="checkCut" type="checkbox" class="txt c1"/>
 					</td>
 					<td style="width:100px;"><a id='lblDatea_na_s'>帳款日期</a></td>
-					<td style="width:140px;"><a id='lblOrdeno_na_s'>進貨單號</a></td>
+					<td style="width:140px;"><a id='lblOrdeno_na_s'>進貨單號</a></td>-->
 				</tr>
 				<tr style='background:#cad3ff;'>
 					<td align="center">
 						<input id="btnMinus.*" type="button" style="font-size: medium; font-weight: bold;" value="－"/>
 						<input id="txtNoq.*" type="text" style="display: none;"/>
+						<input id="txtNeed.*" type="hidden" class="txt c1"/>
 					</td>
 					<td><a id="lblNo.*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
 					<td>
-						<input id="txtProcessno.*" type="text" class="txt c1" style="width: 75%;"/>
+						<input id="txtProcessno.*" type="text" class="txt c1" style="width: 25%;"/>
 						<input class="btn" id="btnProcessno.*" type="button" value='.' style=" font-weight: bold;" />
-						<input id="txtProcess.*" type="text" class="txt c1"/>
+						<input id="txtProcess.*" type="text" class="txt c1"  style="width: 55%;"/>
 					</td>
 					<td><input class="btn" id="btnCubt.*" type="button" value='.' style=" font-weight: bold;" /></td>
-					<td><input id="txtDate2.*" type="text" class="txt c1"/></td>
+					<td><input id="textNeed1.*" type="text" class="txt c1 needs"/></td>
+					<td><input id="textNeed2.*" type="text" class="txt c1 needs"/></td>
+					<td><input id="textNeed3.*" type="text" class="txt c1 needs"/></td>
+					<td><input id="textNeed4.*" type="text" class="txt c1 needs"/></td>
+					<td><input id="textNeed5.*" type="text" class="txt c1 needs"/></td>
+					<td><input id="textNeed6.*" type="text" class="txt c1 needs"/></td>
+					<td><input id="textNeed7.*" type="text" class="txt c1 needs"/></td>
+					<td><input id="textNeed8.*" type="text" class="txt c1 needs"/></td>
+					<td>
+						<input id="txtProductno2.*" type="text" class="txt c1" style="width: 25%;"/>
+						<input class="btn" id="btntxtProductno2.*" type="button" value='.' style=" font-weight: bold;" />
+						<input id="txtProduct2.*" type="text" class="txt c1" style="width: 55%;"/>
+					</td>
+					<td><input id="txtHmount.*" type="text" class="txt num c1"/></td>
+					<td><input id="chkEnda.*" type="checkbox" class="txt c1"/></td>
+					
+					<!--<td><input id="txtDate2.*" type="text" class="txt c1"/></td>
 					<td><input id="txtWmount.*" type="text" class="txt num c1"/></td>
 					<td>
 						<input id="txtTggno.*" type="text" class="txt c1" style="width: 80%;"/>
@@ -1276,13 +1411,10 @@
 					<td><input id="chkSale.*" type="checkbox" class="txt c1" /></td>
 					<td><input id="txtW02.*" type="text" class="txt c1" style="text-align:right;"/></td>
 					<td><input id="txtW01.*" type="text" class="txt c1" style="text-align:right; "/></td>
-					<td>
-						<input id="txtNeed.*" type="text" class="txt c1"/>
-						<input id="txtMemo.*" type="text" class="txt c1"/>
-					</td>
+					<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
 					<td><input id="chkCut.*" type="checkbox" class="txt c1"/></td>
 					<td><input id="txtDatea.*" type="text" class="txt c1"/></td>
-					<td><input id="txtOrdeno.*" type="text" class="txt c1 num" style="color:blue;width: 90%;text-align:left;"/></td>
+					<td><input id="txtOrdeno.*" type="text" class="txt c1 num" style="color:blue;width: 90%;text-align:left;"/></td>-->
 				</tr>
 			</table>
 		</div>

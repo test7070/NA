@@ -23,7 +23,7 @@
 			var decbbs = ['weight', 'uweight', 'price'];
 			var decbbm = ['weight', 'hours', 'pretime', 'mount', 'wages', 'makes'/*, 'mechs', 'trans'*/, 'molds', 'packs', 'uweight', 'price'];
 			var decbbt = [];
-			var q_readonly = ['textCosta','txtModel','txtStationg', 'textCostb', 'textCostc', 'textCostd', 'textCostw', 'textCostm', 'textCostp', 'textCostt', 'textCosttotal', 'textStk', 'textOrdemount', 'textPlanmount', 'textIntmount', 'textAvaistk','txtMolds','txtRev','txtKdate','txtWdate','txtGroupfno'];
+			var q_readonly = ['textCosta','txtModel','txtStationg', 'textCostb', 'textCostc', 'textCostd', 'textCostw', 'textCostm', 'textCostp', 'textCostt', 'textCosttotal', 'textStk', 'textOrdemount', 'textPlanmount', 'textIntmount', 'textAvaistk','txtMolds','txtRev','txtKdate','txtWdate'];
 			var q_readonlys = [];
 			var q_readonlyt = ['txtAssm'];
 			var bbmNum = [['txtPrice', 15, 5, 1, 1],['txtPreday', 12, 0, 1],['txtHours', 10, 3, 1],['txtMinutes', 10, 3, 1],['txtSec', 2, 0, 1]
@@ -41,13 +41,15 @@
 			brwList = [];
 			brwNowPage = 0;
 			brwKey = 'noa';
-			brwCount2 = 7;
+			brwCount2 = 10;
 			aPop = new Array(
 				['txtTggno', 'lblTgg', 'tgg', 'noa,comp', 'txtTggno,txtComp', 'tgg_b.aspx'],
-				['txtGroupeno', 'lblGroupeno_na', 'ucc', 'noa,product', 'txtGroupeno,txtGroupfno', 'ucc_b.aspx'],
+				['txtCustno', 'lblCust', 'cust', 'noa,comp', 'txtCustno,txtCust', 'cust_b.aspx'],
+				['txtBdate', 'lblBdate_na', 'ucc', 'noa,product', 'txtBdate,txtSize', 'ucc_b.aspx'],
+				['txtEdate', 'lblEdate_na', 'ucc', 'noa,product', 'txtEdate,txtStyle', 'ucc_b.aspx'],
 				['txtProductno_', 'btnProductno_', 'ucaucc', 'noa,product,spec,unit', 'txtProductno_,txtProduct_,txtSpec_,txtUnit_', 'ucaucc_b.aspx'],
 				['txtStationno', 'lblStation', 'station', 'noa,station,tggno,tgg', 'txtStationno,txtStation,txtStationtggno,txtStationtgg', 'station_b.aspx'],
-				['txtStationno__', 'btnStation__', 'station__', 'noa,station', 'txtStationno__,txtStation__', 'station_b.aspx'],
+				['txtStationno__', 'btnStation__', 'station', 'noa,station', 'txtStationno__,txtStation__', 'station_b.aspx'],
 				['txtStationgno', 'lblStationg', 'stationg', 'noa,namea', 'txtStationgno,txtStationg', 'stationg_b.aspx'],
 				['txtProcessno', 'lblProcess', 'process', 'noa,process', 'txtProcessno,txtProcess', 'process_b.aspx'],
 				['txtProcessno_', 'btnProcessno_', 'process', 'noa,process', 'txtProcessno_,txtProcess_', 'process_b.aspx'],
@@ -282,16 +284,16 @@
 					}
 				});
 				
+				$('#txtGroupeno').change(function() {
+					productchange();
+				});
+				$('#txtGroupfno').change(function() {
+					productchange();
+				});
 				$('#txtGroupgno').change(function() {
 					productchange();
 				});
 				$('#txtGrouphno').change(function() {
-					productchange();
-				});
-				$('#txtGroupino').change(function() {
-					productchange();
-				});
-				$('#txtGroupjno').change(function() {
 					productchange();
 				});
 			}
@@ -719,156 +721,36 @@
 				for (var i = 0; i < q_bbtCount; i++) {
 					$('#lblNo__' + i).text(i + 1);
 					if (!$('#btnMinut__' + i).hasClass('isAssign')) {
-						$('#txtPrice__' + i).change(function() {
-							t_IdSeq = -1;
-							q_bodyId($(this).attr('id'));
-							b_seq = t_IdSeq;
-							if (dec($('#txtWages__' + b_seq).val()) == 0 && dec($('#txtMakes__' + b_seq).val()) == 0 && !emp($('#txtPrice__' + b_seq).val())) {
-								q_tr('txtWages_fee__' + b_seq, round(q_float('txtPrice__' + b_seq) * 0.8, 2));
-								q_tr('txtMakes_fee__' + b_seq, round(q_float('txtPrice__' + b_seq) * 0.2, 2));
-							}
-						});
-						$('#btnAssm__' + i).mousedown(function(e) {
-							if (q_cur < 1 || q_cur > 2)
-								return;
-							if (!$("#div_assm").is(":hidden"))
-								return;
-							t_IdSeq = -1;
-							q_bodyId($(this).attr('id'));
-							b_seq = t_IdSeq;
-							if (e.button == 0) {
-								$('#btnCheck_div_assm').show();
-								$('#div_assm').toggle();
-								$('#bbt_b_seq').val(b_seq);
-								//清除之前插入的內容
-								//document.getElementById("table_assm").deleteRow();
-								var rowslength = document.getElementById("table_assm").rows.length - 1;
-								for (var j = 1; j < rowslength; j++) {
-									document.getElementById("table_assm").deleteRow(1);
-								}
-								assm_row = 0;
-								//插入bbs&bbt
-								for (var j = 0; j < q_bbsCount; j++) {
-									if (!emp($('#txtProductno_' + j).val())) {
-										var tr = document.createElement("tr");
-										tr.id = "bbs_" + j;
-										tr.innerHTML = "<td id='assm_tdProductno_" + assm_row + "'><input id='assm_txtProductno_" + assm_row + "' type='text' class='txt c1' value='" + $('#txtProductno_' + j).val() + "' disabled='disabled'/></td>";
-										tr.innerHTML += "<td id='assm_tdProduct_" + assm_row + "'><input id='assm_txtProduct_" + assm_row + "' type='text' class='txt c1' value='" + $('#txtProduct_' + j).val() + "' disabled='disabled' /></td>";
-										tr.innerHTML += "<td id='assm_tdMount_" + assm_row + "'><input id='assm_txtMount_" + assm_row + "' type='text' class='txt c1 num' value='" + $('#txtMount_' + j).val() + "' onkeyup='return ValidateFloat($(this),value)'/></td>";
-										var tmp = document.getElementById("assm_close");
-										tmp.parentNode.insertBefore(tr, tmp);
-										assm_row++;
-									}
-								}
-								for (var j = 0; j < q_bbtCount; j++) {
-									if (!emp($('#txtProductno__' + j).val()) && $('#txtProductno__' + j).val() != $('#txtNoa').val()) {
-										var tr = document.createElement("tr");
-										tr.id = "bbt_" + j;
-										tr.innerHTML = "<td id='assm_tdProductno_" + assm_row + "'><input id='assm_txtProductno_" + assm_row + "' type='text' class='txt c1' value='" + $('#txtProductno__' + j).val() + "' disabled='disabled'/></td>";
-										tr.innerHTML += "<td id='assm_tdProduct_" + assm_row + "'><input id='assm_txtProduct_" + assm_row + "' type='text' class='txt c1' value='" + $('#txtProductno__' + j).val() + "-半成品' disabled='disabled' /></td>";
-										tr.innerHTML += "<td id='assm_tdMount_" + assm_row + "'><input id='assm_txtMount_" + assm_row + "' type='text' class='txt c1 num' value='0' onkeyup='return ValidateFloat($(this),value)'/></td>";
-										var tmp = document.getElementById("assm_close");
-										tmp.parentNode.insertBefore(tr, tmp);
-										assm_row++;
-									}
-								}
-								//顯示資料的數量
-								var assmtmp = $('#txtAssm__' + b_seq).val().split(';');
-								for (var x = 0; x < assmtmp.length; x++) {
-									var assmmount = assmtmp[x].split(',');
-									for (var y = 0; y < assm_row; y++) {
-										if ($('#assm_txtProductno_' + y).val() == assmmount[0]) {
-											$('#assm_txtMount_' + y).val(assmmount[1]);
-											break;
-										}
-									}
-								}
-								////////////控制顯示位置
-								$('#div_assm').css('top', e.pageY - parseInt($('#div_assm').css('height')));
-								$('#div_assm').css('left', e.pageX - parseInt($('#div_assm').css('width')));
-								//////////////
-							}
-						});
-						//只顯示使用的原物料
-						$('#txtAssm__' + i).mousedown(function(e) {
-							t_IdSeq = -1;
-							q_bodyId($(this).attr('id'));
-							b_seq = t_IdSeq;
-							if (emp($('#txtAssm__' + b_seq).val()))
-								return;
-							if (!$("#div_assm").is(":hidden"))
-								return;
-							if (e.button == 0) {
-								$('#btnCheck_div_assm').hide();
-								$('#div_assm').toggle();
-								$('#bbt_b_seq').val(b_seq);
-								//清除之前插入的內容
-								//document.getElementById("table_assm").deleteRow();
-								var rowslength = document.getElementById("table_assm").rows.length - 1;
-								for (var j = 1; j < rowslength; j++) {
-									document.getElementById("table_assm").deleteRow(1);
-								}
-								assm_row = 0;
-								//插入bbs&bbt
-								for (var j = 0; j < q_bbsCount; j++) {
-									if (!emp($('#txtProductno_' + j).val()) && $('#txtAssm__' + b_seq).val().indexOf($('#txtProductno_' + j).val()) > -1) {
-										var tr = document.createElement("tr");
-										tr.id = "bbs_" + j;
-										tr.innerHTML = "<td id='assm_tdProductno_" + assm_row + "'><input id='assm_txtProductno_" + assm_row + "' type='text' class='txt c1' value='" + $('#txtProductno_' + j).val() + "' disabled='disabled'/></td>";
-										tr.innerHTML += "<td id='assm_tdProduct_" + assm_row + "'><input id='assm_txtProduct_" + assm_row + "' type='text' class='txt c1' value='" + $('#txtProduct_' + j).val() + "' disabled='disabled' /></td>";
-										tr.innerHTML += "<td id='assm_tdMount_" + assm_row + "'><input id='assm_txtMount_" + assm_row + "' type='text' class='txt c1 num' value='" + $('#txtMount_' + j).val() + "' onkeyup='return ValidateFloat($(this),value)' disabled='disabled'/></td>";
-										var tmp = document.getElementById("assm_close");
-										tmp.parentNode.insertBefore(tr, tmp);
-										assm_row++;
-									}
-								}
-								for (var j = 0; j < q_bbtCount; j++) {
-									if (!emp($('#txtProductno__' + j).val()) && $('#txtProductno__' + j).val() != $('#txtNoa').val() && $('#txtAssm__' + b_seq).val().indexOf($('#txtProductno__' + j).val()) > -1) {
-										var tr = document.createElement("tr");
-										tr.id = "bbt_" + j;
-										tr.innerHTML = "<td id='assm_tdProductno_" + assm_row + "'><input id='assm_txtProductno_" + assm_row + "' type='text' class='txt c1' value='" + $('#txtProductno__' + j).val() + "' disabled='disabled'/></td>";
-										tr.innerHTML += "<td id='assm_tdProduct_" + assm_row + "'><input id='assm_txtProduct_" + assm_row + "' type='text' class='txt c1' value='" + $('#txtProductno__' + j).val() + "-半成品' disabled='disabled' /></td>";
-										tr.innerHTML += "<td id='assm_tdMount_" + assm_row + "'><input id='assm_txtMount_" + assm_row + "' type='text' class='txt c1 num' value='0' onkeyup='return ValidateFloat($(this),value)' disabled='disabled'/></td>";
-										var tmp = document.getElementById("assm_close");
-										tmp.parentNode.insertBefore(tr, tmp);
-										assm_row++;
-									}
-								}
-								//顯示資料的數量
-								var assmtmp = $('#txtAssm__' + b_seq).val().split(';');
-								for (var x = 0; x < assmtmp.length; x++) {
-									var assmmount = assmtmp[x].split(',');
-									for (var y = 0; y < assm_row; y++) {
-										if ($('#assm_txtProductno_' + y).val() == assmmount[0]) {
-											$('#assm_txtMount_' + y).val(assmmount[1]);
-											break;
-										}
-									}
-								}
-								////////////控制顯示位置
-								$('#div_assm').css('top', e.pageY - parseInt($('#div_assm').css('height')));
-								$('#div_assm').css('left', e.pageX - parseInt($('#div_assm').css('width')));
-								//////////////
-							}
-						});
-						$('#btnMinut__' + i).bind('contextmenu',function(e) {
-							e.preventDefault();
-							if (e.button == 2) {
-								////////////控制顯示位置
-								$('#div_row').css('top', e.pageY);
-								$('#div_row').css('left', e.pageX);
-								//////////////
-								t_IdSeq = -1;
-								q_bodyId($(this).attr('id'));
-								b_seq = t_IdSeq;
-								$('#div_row').show();
-								row_b_seq = b_seq;
-								row_bbsbbt = 'bbt';
-							}
-						});
+						
 					}
 				}
 				_bbtAssign();
+				
+				$('.assmt').each(function(index) {
+					$(this).unbind('change');
+					$(this).change(function() {
+						var n=$(this).attr('id').split('__')[1];
+						var t_assm='';
+						for(var k=1;k<=13;k++){
+							t_assm=t_assm+'@,#'+$('#textAssm'+k+'__'+n).val();
+						}
+						
+						$('#txtAssm__'+n).val(t_assm);
+					});
+				});
+				splitbbtf();
+			}
+			
+			function splitbbtf(){ //拆解bbt欄位
+				for (var i = 0; i < q_bbtCount; i++) {
+					//合併儲存
+					var tstr=$('#txtAssm__'+i).val().split('@,#');
+					if(tstr.length>1){
+						for(var k=1;k<=13;k++){
+							$('#textAssm'+k+'__'+i).val(tstr[k]);
+						}
+					}
+				}
 			}
 			
 			function q_funcPost(t_func, result) {
@@ -963,7 +845,7 @@
             
             function q_popPost(s1) {
 			   	switch (s1) {
-			   		case 'txtGroupeno':
+			   		case 'txtBdate':
 			   			productchange();
 			   			break;
 			   	}
@@ -973,11 +855,11 @@
 			}
 			
 			function productchange(){
-				var t_spec=$('#txtGroupfno').val();
-				var t_size1=$('#txtGroupgno').val();
-				var t_size2=$('#txtGrouphno').val();
-				var t_size3=$('#txtGroupino').val();
-				var t_size4=$('#txtGroupjno').val();
+				var t_spec=$('#txtSize').val();
+				var t_size1=$('#txtGroupeno').val();
+				var t_size2=$('#txtGroupfno').val();
+				var t_size3=$('#txtGroupgno').val();
+				var t_size4=$('#txtGrouphno').val();
 				var t_size=t_size1;
 				if(t_size2.length>0){
 					t_size=t_size+(t_size.length>0?'x':'')+t_size2;
@@ -1476,8 +1358,8 @@
 				<table class="tview" id="tview" border="1" cellpadding='2' cellspacing='0' style="background-color: #FFFF66;">
 					<tr>
 						<td align="center" style="width:40px"><a id='vewChk'> </a></td>
-						<td align="center" style="width:150px"><a id='vewNoa'> </a></td>
-						<td align="center" style="width:210px"><a id='vewProduct'> </a></td>
+						<td align="center" style="width:170px"><a id='vewNoa'> </a></td>
+						<td align="center" style="width:190px"><a id='vewProduct'> </a></td>
 					</tr>
 					<tr>
 						<td><input id="chkBrow.*" type="checkbox" style=''/></td>
@@ -1496,95 +1378,99 @@
 						<td style="width:100px;"> </td>
 						<td style="width:130px;"> </td>
 					</tr>
-					<tr class="tr1">
-						<td class="td1"><span> </span><a id="lblNoa" class="lbl"> </a></td>
-						<td class="td2"><input id="txtNoa" type="text" class="txt c1"/></td>
-						<td class="td3"><span> </span><a id="lblKdate" class="lbl"> </a></td>
-						<td class="td4">
+					<tr>
+						<td><span> </span><a id="lblNoa" class="lbl"> </a></td>
+						<td><input id="txtNoa" type="text" class="txt c1"/></td>
+						<td><span> </span><a id="lblKdate" class="lbl"> </a></td>
+						<td>
 							<input id="txtKdate" type="text" class="txt" style="width:65%;"/>
 							<div style="float:left;">
 								<input id="Copy" type="checkbox" />
 								<span> </span><a id="lblCopy"> </a>
 							</div>
 						</td>
-						<td class="td5"><span> </span><a id="lblWdate" class="lbl"> </a></td>
-						<td class="td6"><input id="txtWdate" type="text" class="txt"/></td>
-					</tr>
-					<tr class="tr2">
-						<td class="td3"><span> </span><a id="lblProduct" class="lbl"> </a></td>
-						<td class="td4" colspan='2'><input id="txtProduct" type="text" class="txt c1"/></td>
-						<td class="td6">
-							<input id="btnUcctd" type="button" />
-							<input id="btnCustproduct" type="button" />
-						</td>
-						<td class="td1"><span> </span><a id="lblType" class="lbl"> </a></td>
-						<td class="td2"><select id="cmbTypea" class="txt c1" style="font-size: medium;"> </select></td>
+						<td><span> </span><a id="lblWdate" class="lbl"> </a></td>
+						<td><input id="txtWdate" type="text" class="txt"/></td>
 					</tr>
 					<tr>
-						<td class="td1"><span> </span><a id="lblGroupeno_na" class="lbl">材質</a></td>
-						<td class="td1">
-							<input id="txtGroupeno" type="text" class="txt c1" style="width:40%;"/>
-							<input id="txtGroupfno" type="text" class="txt c1" style="width:40%;"/>
+						<td><span> </span><a id="lblProduct" class="lbl"> </a></td>
+						<td colspan='2'><input id="txtProduct" type="text" class="txt c1"/></td>
+						<td><span> </span><a id="lblEngpro" class="lbl"> </a></td>
+						<td colspan='2'><input id="txtEngpro" type="text" class="txt c1"/></td>
+						<td style="display: none;"><span> </span><a id="lblType" class="lbl"> </a></td>
+						<td style="display: none;"><select id="cmbTypea" class="txt c1" style="font-size: medium;"> </select></td>
+						<td style="display: none;"><input id="btnCustproduct" type="button" /></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblBdate_na" class="lbl">成品材質</a></td>
+						<td>
+							<input id="txtBdate" type="text" class="txt c1" style="width:40%;"/>
+							<input id="txtSize" type="text" class="txt c1" style="width:40%;"/>
 						</td>
-						<td class="td5"><span> </span><a id="lblGroupgno_na" class="lbl" >短徑</a></td>
-						<td class="td6"><input id="txtGroupgno" type="text" class="txt c1 num" style="width:30%;"/>
+						<td><span> </span><a id="lblGroupeno_na" class="lbl" >短徑</a></td>
+						<td><input id="txtGroupeno" type="text" class="txt c1 num" style="width:30%;"/>
 							<span style="float: left;margin-left: 15px;"> </span>
-							<a id="lblGrouphno_na" class="lbl" style="float: left;">長徑</a>
+							<a id="lblGroupfno_na" class="lbl" style="float: left;">長徑</a>
+							<span style="float: left;"> </span>
+							<input id="txtGroupfno" type="text" class="txt c1 num" style="width:30%;"/>
+						</td>
+						<td><span> </span><a id="lblGroupgno_na" class="lbl" >厚度</a></td>
+						<td><input id="txtGroupgno" type="text" class="txt c1 num" style="width:30%;"/>
+							<span style="float: left;margin-left: 15px;"> </span>
+							<a id="lblGrouphno_na" class="lbl" style="float: left;">長度</a>
 							<span style="float: left;"> </span>
 							<input id="txtGrouphno" type="text" class="txt c1 num" style="width:30%;"/>
 						</td>
-						<td class="td5"><span> </span><a id="lblGroupino_na" class="lbl" >厚度</a></td>
-						<td class="td6"><input id="txtGroupino" type="text" class="txt c1 num" style="width:30%;"/>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblEdate_na" class="lbl">素材材質</a></td>
+						<td>
+							<input id="txtEdate" type="text" class="txt c1" style="width:40%;"/>
+							<input id="txtStyle" type="text" class="txt c1" style="width:40%;"/>
+						</td>
+						<td><span> </span><a id="lblGroupino_na" class="lbl" >短徑</a></td>
+						<td><input id="txtGroupino" type="text" class="txt c1 num" style="width:30%;"/>
 							<span style="float: left;margin-left: 15px;"> </span>
-							<a id="lblGroupjno_na" class="lbl" style="float: left;">長度</a>
+							<a id="lblGroupjno_na" class="lbl" style="float: left;">長徑</a>
 							<span style="float: left;"> </span>
 							<input id="txtGroupjno" type="text" class="txt c1 num" style="width:30%;"/>
 						</td>
-					</tr>
-					<tr class="tr3">
-						<td class="td1"><span> </span><a id="lblEngpro" class="lbl"> </a></td>
-						<td class="td2" colspan='5'><input id="txtEngpro" type="text" class="txt c1"/></td>
-					</tr>
-					<tr class="tr4">
-						<td class="td1"><span> </span><a id="lblStation" class="lbl btn"> </a></td>
-						<td class="td2">
-							<input id="txtStationno" type="text" class="txt" style="width: 45%;"/>
-							<input id="txtStation" type="text" class="txt" style="width: 53%;"/>
+						<td><span> </span><a id="lblGroupkno_na" class="lbl" >厚度</a></td>
+						<td><input id="txtGroupkno" type="text" class="txt c1 num" style="width:30%;"/>
+							<span style="float: left;margin-left: 15px;"> </span>
+							<a id="lblGrouplno_na" class="lbl" style="float: left;">長度</a>
+							<span style="float: left;"> </span>
+							<input id="txtGrouplno" type="text" class="txt c1 num" style="width:30%;"/>
 						</td>
-						<td class="td3"><span> </span><a id="lblSpec" class="lbl"> </a></td>
-						<td class="td4"><input id="txtSpec" type="text" class="txt c1"/></td>
-						<td class="td5"><span> </span><a id="lblUnit" class="lbl"> </a></td>
-						<td class="td6"><input id="txtUnit" type="text" class="txt c1"/></td>
-					</tr>
-					<tr class="tr5">
-						<td><span> </span><a id="lblStationtgg" class="lbl"> </a></td>
-						<td>
-							<input id="txtStationtggno" type="text" class="txt" style="width: 45%;"/>
-							<input id="txtStationtgg" type="text" class="txt" style="width: 53%;"/>
-						</td>
-						<td class="td5"><span> </span><a id="lblPrice" class="lbl"> </a></td>
-						<td class="td6"><input id="txtPrice" type="text" class="txt num c1"/></td>
-					</tr>
-					
-					<tr class="tr6">
-						<td class="td1"><span> </span><a id="lblStationg" class="lbl btn"> </a></td>
-						<td class="td2">
-							<input id="txtStationgno" type="text" class="txt" style="width: 45%;"/>
-							<input id="txtStationg" type="text" class="txt" style="width: 53%;"/>
-						</td>
-						
-						<td class="td1"><span> </span><a id="lblUweight" class="lbl"> </a></td>
-						<td class="td2"><input id="txtUweight" type="text" class="txt c1 num"/></td>
 					</tr>
 					<tr>
-						<td class="td1"><span> </span><a id="lblStyle" class="lbl"> </a></td>
-						<td class="td2"><input id="txtStyle" type="text" class="txt c1"/></td>
-						<td class="td3"><span> </span><a id="lblGroupano" class="lbl"> </a></td>
-						<td class="td4"><select id="cmbGroupano" class="txt" style="font-size: medium;width: 55%;"> </select>
-										<select id="cmbGroupbno" class="txt isUJ" style="font-size: medium;width: 45%;display: none;"> </select>
+						<td><span> </span><a id="lblCust" class="lbl btn"> </a></td>
+						<td>
+							<input id="txtCustno" type="text" class="txt" style="width: 45%;"/>
+							<input id="txtCust" type="text" class="txt" style="width: 53%;"/>
 						</td>
-						<td class="td5"><span> </span><a id="lblStdmount" class="lbl" > </a></td>
-						<td class="td6"><input id="txtStdmount" type="text" class="txt c1 num" style="width:30%;"/>
+						<!--<td><span> </span><a id="lblUnit" class="lbl"> </a></td>
+						<td><input id="txtUnit" type="text" class="txt c1"/></td>-->
+						<td><span> </span><a id="lblUweight" class="lbl"> </a></td>
+						<td><input id="txtUweight" type="text" class="txt c1 num"/></td>
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblGroupano" class="lbl"> </a></td>
+						<td>
+							<select id="cmbGroupano" class="txt" style="font-size: medium;width: 55%;"> </select>
+							<select id="cmbGroupbno" class="txt isUJ" style="font-size: medium;width: 45%;display: none;"> </select>
+						</td>
+						<td><span> </span><a id="lblTgg" class="lbl btn"> </a></td>
+						<td>
+							<input id="txtTggno" type="text" class="txt" style="width: 45%;"/>
+							<input id="txtComp" type="text" class="txt" style="width: 53%;"/>
+						</td>
+						<td><span> </span><a id="lblPrice" class="lbl"> </a></td>
+						<td><input id="txtPrice" type="text" class="txt num c1"/></td>
+					</tr>
+					<tr style="display: none;">
+						<td><span> </span><a id="lblStdmount" class="lbl" > </a></td>
+						<td><input id="txtStdmount" type="text" class="txt c1 num" style="width:30%;"/>
 							<span style="float: left;"> </span>
 							<a id="lblSafemount" class="lbl" style="float: left;"> </a>
 							<span style="float: left;"> </span>
@@ -1592,8 +1478,8 @@
 						</td>
 					</tr>
 					<tr>
-						<td class="td3"><span> </span><a id="lblHours" class="lbl"> </a></td>
-						<td class="td4">
+						<td><span> </span><a id="lblHours" class="lbl"> </a></td>
+						<td>
 							<input id="txtHours" type="text" class="txt num" style="display: none;"/>
 							<span style="float:left;width:15%;padding-left:3px;display: none;">Hr.</span>
 							<input id="txtMinutes" type="text" class="txt num c1" style="width: 30%;"/>
@@ -1603,38 +1489,33 @@
 						</td>
 						
 						<td><span> </span><a id="lblPreday" class="lbl"> </a></td>
-						<td><input id="txtPreday" type="text" class="txt c1 num"/></td>
+						<td>
+							<input id="txtPreday" type="text" class="txt c1 num" style="width:30%;"/>
+							<span style="float: left;"> </span>
+							<a id="lblBadperc" class="lbl" style="float: left;"> </a>
+							<span style="float: left;"> </span>
+							<input id="txtBadperc" type="text" class="txt c1 num" style="width:30%;"/>
+						</td>
 					</tr>
-					<tr class="tr7">
-						<td class="td1"><span> </span><a id="lblMemo" class="lbl"> </a></td>
-						<td class="td2" colspan='3'>
+					<tr>
+						<td><span> </span><a id="lblMemo_na" class="lbl">特殊要求</a></td>
+						<td colspan='3'>
 							<input id="txtMemo" type="text" class="txt c1" style="width: 99%;"/>
 							<input type="hidden" id="txtImages" class="txt c1"/>
 						</td>
-						<td class="td1"><span> </span><a id="lblBadperc" class="lbl"> </a></td>
-						<td class="td2"><input id="txtBadperc" type="text" class="txt c1 num"/></td>
-					</tr>
-					<tr class="tr8">
-						<!--
-						<td class="td1"><span> </span><a id="lblMechs" class="lbl" style="font-size: 14px;"> </a></td>
-						<td class="td2"><input id="txtMechs" type="text" class="txt c1 num"/></td>
-						-->
-						<td class="td3"><span> </span><a id="lblMakes" class="lbl" style="font-size: 14px;"> </a></td>
-						<td class="td4"><input id="txtMakes" type="text" class="txt c1 num"/></td>
-						<td class="td5"><span> </span><a id="lblPacks" class="lbl"> </a></td>
-						<td class="td6"><input id="txtPacks" type="text" class="txt c1 num"/></td>
-					</tr>
-					<tr class="tr9">
-						<td class="td3"><span> </span><a id="lblWages" class="lbl" style="font-size: 14px;"> </a></td>
-						<td class="td4"><input id="txtWages" type="text" class="txt c1 num"/></td>
-						<td class="td5"><span> </span><a id="lblRev" class="lbl"> </a></td>
-						<td class="td6"><input id="txtRev" type="text" class="txt c1" style="width: 30%;"/>
+						<td><span> </span><a id="lblRev" class="lbl"> </a></td>
+						<td>
+							<input id="txtRev" type="text" class="txt c1" style="width: 30%;"/>
 							<input id="btnUploadimg" type="button"  />
 						</td>
-						<!--
-						<td class="td5"><span> </span><a id="lblTrans" class="lbl"> </a></td>
-						<td class="td6"><input id="txtTrans" type="text" class="txt c1 num"/></td>
-						-->
+					</tr>
+					<tr>
+						<td><span> </span><a id="lblMakes" class="lbl" style="font-size: 14px;"> </a></td>
+						<td><input id="txtMakes" type="text" class="txt c1 num"/></td>
+						<td><span> </span><a id="lblPacks" class="lbl" style="font-size: 14px;"> </a></td>
+						<td><input id="txtPacks" type="text" class="txt c1 num"/></td>
+						<td><span> </span><a id="lblWages" class="lbl" style="font-size: 14px;"> </a></td>
+						<td><input id="txtWages" type="text" class="txt c1 num"/></td>
 					</tr>
 					<input id="text_Noq" type="hidden" />
 				</table>
@@ -1702,74 +1583,60 @@
 						<input id="btnPlut" type="button" style="font-size: medium; font-weight: bold;" value="＋"/>
 					</td>
 					<td style="width:20px;"> </td>
-					<td align="center" style="width:145px;"><a id='lblProcess_t'> </a></td>
+					<td align="center" style="width:145px;display: none;"><a id='lblProcess_t'> </a></td>
+					<td align="center" style="width:145px;"><a id='lblStation_na_t'>製程</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm1_na_t'>製程備註1</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm2_na_t'>製程備註2</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm3_na_t'>製程備註3</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm4_na_t'>製程備註4</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm5_na_t'>製程備註5</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm6_na_t'>製程備註6</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm7_na_t'>製程備註7</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm8_na_t'>製程備註8</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm9_na_t'>製程備註9</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm10_na_t'>製程備註10</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm11_na_t'>製程備註11</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm12_na_t'>製程備註12</a></td>
+					<td align="center" style="width:60px;"><a id='lblAssm13_na_t'>製程備註13</a></td>
 					<td align="center" style="width:145px;"><a id='lblTgg_t'> </a></td>
-					<td align="center" style="width:145px;"><a id='lblStation_t'> </a></td>
-					<!--<td align="center" style="width:8%;"><a id='lblMount_t'></a></td>-->
 					<td align="center" style="width:100px;"><a id='lblPrice_t'> </a></td>
-					<!--<td align="center" style="width:8%;"><a id='lblEndmount_t'></a></td>-->
-					<td align="center" style="width:75px; display: none;"><a id='lblHours_t'> </a></td>
-					<td align="center" style="width:120px;"><a id='lblMinutes_t'> </a></td>
-					<td align="center" style="width:120px;"><a id='lblHminutes_t'> </a></td>
-					<td align="center" style="width:175px;"><a id='lblProductno_t'> </a></td>
-					<td align="center" style="width:190px;"><a id='lblAssm_t'> </a></td>
-					<td align="center" style="width:87px;"><a id='lblMount_t'> </a></td>
-					<td align="center" style="width:87px;"><a id='lblLoss_t'> </a></td>
-					<td align="center" style="width:87px;"><a id='lblWages_t'> </a></td>
-					<td align="center" style="width:87px;"><a id='lblMakes_t'> </a></td>
-					<td align="center" style="width:103px;"><a id='lblWages_fee_t'> </a></td>
-					<td align="center" style="width:103px;"><a id='lblMakes_fee_t'> </a></td>
 				</tr>
 				<tr>
 					<td>
 						<input id="btnMinut..*" type="button" style="font-size: medium; font-weight: bold;" value="－"/>
-						<input class="txt" id="txtNoq..*" type="text" style="display: none;"/>
+						<input class="txt" id="txtNoq..*" type="hidden"/>
+						<input class="txt" id="txtAssm..*" type="hidden"/>
 					</td>
 					<td><a id="lblNo..*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
-					<td>
-						<input id="txtProcessno..*" type="text" class="txt c5"/>
+					<td style="display: none;">
+						<input id="txtProcessno..*" type="text" class="txt c1" style="width: 30%;"/>
 						<input id="btnProcessno..*" type="button" value='.' style=" font-weight: bold;width:1%;" />
-						<input id="txtProcess..*" type="text" class="txt c1"/>
+						<input id="txtProcess..*" type="text" class="txt c1"  style="width: 50%;"/>
 					</td>
 					<td>
-						<input id="txtTggno..*" type="text" class="txt c5"/>
-						<input id="btnTggno..*" type="button" value='.' style=" font-weight: bold;width:1%;" />
-						<input id="txtNick..*" type="text" class="txt c1"/>
-					</td>
-					<td>
-						<input id="txtStationno..*" type="text" class="txt c5"/>
+						<input id="txtStationno..*" type="text" class="txt c1" style="width: 30%;"/>
 						<input id="btnStation..*" type="button" value='.' style=" font-weight: bold;width:1%;" />
-						<input id="txtStation..*" type="text" class="txt c1"/>
+						<input id="txtStation..*" type="text" class="txt c1" style="width: 50%;"/>
 					</td>
-					<!--<td>
-					<input id="txtMount..*" type="text" class="txt c1 num"/>
-					<input id="txtWeight..*" type="text" class="txt c1 num"/>
-					</td>-->
+					<td><input id="textAssm1..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm2..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm3..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm4..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm5..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm6..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm7..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm8..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm9..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm10..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm11..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm12..*" type="text" class="txt c1 assmt"/></td>
+					<td><input id="textAssm13..*" type="text" class="txt c1 assmt"/></td>
+					<td>
+						<input id="txtTggno..*" type="text" class="txt c1" style="width: 30%;"/>
+						<input id="btnTggno..*" type="button" value='.' style=" font-weight: bold;width:1%;" />
+						<input id="txtNick..*" type="text" class="txt c1" style="width: 50%;"/>
+					</td>
 					<td><input id="txtPrice..*" type="text" class="txt c1 num"/></td>
-					<!--<td>
-					<input id="txtEndmount..*" type="text" class="txt c1 num"/>
-					<input id="txtEndweight..*" type="text" class="txt c1 num"/>
-					</td>-->
-					<td style="display: none;"><input id="txtHours..*" type="text" class="txt c1 num"/></td>
-					<td>
-						<input id="txtMinutes..*" type="text" class="txt c1 num" style="width: 45%;"/>
-						<input id="txtSec..*" type="text" class="txt c1 num" style="width: 45%;"/>
-					</td>
-					<td>
-						<input id="txtHminutes..*" type="text" class="txt c1 num" style="width: 45%;"/>
-						<input id="txtHsec..*" type="text" class="txt c1 num" style="width: 45%;"/>
-					</td>
-					<td><input id="txtProductno..*" type="text" class="txt c1"/></td>
-					<td>
-						<input id="btnAssm..*" type="button" value='.' style=" font-weight: bold;width:1%; float: left;" />
-						<input id="txtAssm..*" type="text" class="txt" style="width: 80%"/>
-					</td>
-					<td><input id="txtMount..*" type="text" class="txt c1 num"/></td>
-					<td><input id="txtLoss..*" type="text" class="txt c1 num"/></td>
-					<td><input id="txtWages..*" type="text" class="txt c1 num"/></td>
-					<td><input id="txtMakes..*" type="text" class="txt c1 num"/></td>
-					<td><input id="txtWages_fee..*" type="text" class="txt c1 num"/></td>
-					<td><input id="txtMakes_fee..*" type="text" class="txt c1 num"/></td>
 				</tr>
 			</table>
 		</div>

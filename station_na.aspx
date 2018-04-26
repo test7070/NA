@@ -18,16 +18,15 @@
 
 			q_tables = 's';
 			var q_name = "station";
-			var q_readonly = ['txtGen','txtMaxmodmount'];
+			var q_readonly = [];
 			var q_readonlys = [];
-			var bbmNum = [['txtMount',10,0,1],['txtHours',10,2,1],['txtGen',10,2,1]
-			,['txtMaxgen',10,2,1]];
+			var bbmNum = [['txtGen',10,2,1]];
 			var bbsNum = [['txtGen',10,2,1],['txtLoadrate',10,2,1]];
 			var bbmMask = [];
 			var bbsMask = [];
 			q_sqlCount = 6;
 			brwCount = 6;
-			brwCount2 = 16;
+			brwCount2 = 8;
 			brwList = [];
 			brwNowPage = 0;
 			brwKey = 'noa';
@@ -39,7 +38,7 @@
 			});
 			aPop = new Array(
 				['txtFactoryno', 'lblFactory', 'factory', 'noa,factory', 'txtFactoryno,txtFactory', 'factory_b.aspx'],
-				['txtMechno_', 'btnMechno_', 'mech', 'noa,mech,gen', 'txtMechno_,txtMech_,txtGen_', 'mech_b.aspx'],
+				['txtMechno_', 'btnMechno_', 'mech', 'noa,mech', 'txtMechno_,txtMech_', 'mech_b.aspx'],
 				['txtStoreno', 'lblStoreno', 'store', 'noa,store', 'txtStoreno,txtStore', 'store_b.aspx'],
 				['txtStoreinno', 'lblStoreinno', 'store', 'noa,store', 'txtStoreinno,txtStorein', 'store_b.aspx'],
 				['txtStationgno', 'lblStationgno', 'stationg', 'noa,namea', 'txtStationgno,txtStationg', 'stationg_b.aspx'],
@@ -57,9 +56,6 @@
 			function mainPost() {
 				q_getFormat();
 				
-				q_cmbParse("cmbGensel", ',KG,MM,支,米,把');
-				ChangeMUnit();
-				
 				$('#txtNoa').change(function(e) {
 					$(this).val($.trim($(this).val()).toUpperCase());
 					if($(this).val().length > 0) {
@@ -72,10 +68,6 @@
 				});
 				$('#txtMount').change(function(){
 					sum();
-				});
-				
-				$('#cmbGensel').change(function(){
-					ChangeMUnit();
 				});
 				
 				$('#txtMaxop').change(function() {
@@ -176,7 +168,6 @@
 				_btnModi();
 				refreshBbm();
 				$('#txtStation').focus();
-				ChangeMUnit();
 			}
 
 			function btnPrint() {
@@ -194,7 +185,6 @@
 					}
 				}
 				_bbsAssign();
-				ChangeMUnit();
 			}
 
 			function bbsSave(as) {
@@ -229,7 +219,6 @@
 			function refresh(recno) {
 				_refresh(recno);
 				refreshBbm();
-				ChangeMUnit();
 			}
 
 			function refreshBbm() {
@@ -297,9 +286,6 @@
 				_btnCancel();
 			}
 			
-			function ChangeMUnit() {
-				$('#lblMaxgenunit_na').text($('#cmbGensel').find("option:selected").text()+'/機台');
-			}
 		</script>
 		<style type="text/css">
 			#dmain {
@@ -407,7 +393,7 @@
 				width: 100%;
 			}
 			.dbbs {
-				width: 950px;
+				width: 650px;
 			}
 			.tbbs a {
 				font-size: medium;
@@ -458,15 +444,9 @@
 						<td class="td4"> </td>
 					</tr>
 					<tr>
-						<td class="td1"><span> </span><a id='lblStation_na' class="lbl">機台</a></td>
+						<td class="td1"><span> </span><a id='lblStation_na' class="lbl">製程</a></td>
 						<td class="td2"><input id="txtStation" type="text" class="txt c1"/></td>
 						<td class="td3"> </td>
-						<td class="td4"> </td>
-					</tr>
-					<tr>
-						<td class="td1"><span> </span><a id='lblStationgno_na' class="lbl">製程</a></td>
-						<td class="td2"><input id="txtStationgno" type="text" class="txt c1"/></td>
-						<td class="td3"><input id="txtStationg" type="hidden" class="txt c1"/></td>
 						<td class="td4"> </td>
 					</tr>
 					<tr>
@@ -506,34 +486,9 @@
 						<td class="td4"> </td>
 					</tr>
 					<tr>
-						<td class="td1"><span> </span><a id='lblGensel' class="lbl"> </a></td>
-						<td class="td2"><select id="cmbGensel" style="font-size: medium;" > </select></td>
-						<td class="td3"> </td>
-						<td class="td4"> </td>
-					</tr>
-					<tr>
-						<td class="td1"><span> </span><a id='lblHours' class="lbl"> </a></td>
-						<td class="td2"><input id="txtHours" type="text" class="txt c1 num"/></td>
-						<td class="td3">HR</td>
-						<td class="td4"> </td>
-					</tr>
-					<tr>
-						<td class="td1"><span> </span><a id='lblMount' class="lbl"> </a></td>
-						<td class="td2"><input id="txtMount" type="text" class="txt c1 num"/></td>
-						<td class="td3"><a id='lblMechunit' class="lbl" style="float: left;"> </a></td>
-						<td class="td4"> </td>
-					</tr>
-					<tr>
-						<td class="td1"><span> </span><a id='lblGen' class="lbl"> </a></td>
+						<td class="td1"><span> </span><a id='lblGen_na' class="lbl">標準日工時</a></td>
 						<td class="td2"><input id="txtGen" type="text" class="txt c1 num"/></td>
 						<td class="td3"><a id='lblMachunit_na' class="lbl" style="float: left;">HR</a></td>
-						<td class="td4"> </td>
-						
-					</tr>
-					<tr>
-						<td class="td1"><span> </span><a id='lblMaxgen' class="lbl"> </a></td>
-						<td class="td2"><input id="txtMaxgen" type="text" class="txt c1 num"/></td>
-						<td class="td3"><a id='lblMaxgenunit_na' class="lbl" style="float: left;">Pcs/機台</a></td>
 						<td class="td4"> </td>
 					</tr>
 					<tr>
@@ -548,18 +503,16 @@
 				</table>
 			</div>
 		</div>
-		<div class='dbbs' style="display: none;">
+		<div class='dbbs'>
 			<table id="tbbs" class='tbbs'>
 				<tr style='color:white; background:#003366;' >
 					<td align="center" style="width: 2%;">
 						<input class="btn" id="btnPlus" type="button" value='+' style="font-weight: bold;" />
 					</td>
-					<td align="center" style="width:10%;"><a id='lblMechno_s'> </a></td>
-					<td align="center" style="width:20%;"><a id='lblMech_s'> </a></td>
-					<td align="center" style="width:8%;"><a id='lblGen_s'> </a></td>
-					<td align="center" style="width:8%;"><a id='lblLoadrate_s'> </a></td>
-					<td align="center" style="width:15%;"><a id='lblWeekno_s'> </a></td>
-					<td align="center" style="width:15%;"><a id='lblDayno_s'> </a></td>
+					<td align="center" style="width:20%;"><a id='lblMechno_s'> </a></td>
+					<td align="center" style="width:25%;"><a id='lblMech_s'> </a></td>
+					<td align="center" style="width:15%;"><a id='lblGen_na_s'>產量</a></td>
+					<td align="center" style="width:10%;"><a id='lblDayno_na_s'>單位</a></td>
 					<td align="center" ><a id='lblMemo_s'> </a></td>
 				</tr>
 				<tr style='background:#cad3ff;'>
@@ -573,8 +526,6 @@
 					</td>
 					<td><input type="text" id="txtMech.*" class="txt c1"/></td>
 					<td><input id="txtGen.*" type="text" class="txt num c1"/></td>
-					<td><input id="txtLoadrate.*" type="text" class="txt num c1"/></td>
-					<td><input id="txtWeekno.*" type="text" class="txt c1"/></td>
 					<td><input id="txtDayno.*" type="text" class="txt c1"/></td>
 					<td><input id="txtMemo.*" type="text" class="txt c1"/></td>
 				</tr>
