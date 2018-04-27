@@ -1477,7 +1477,7 @@
 							<input id="txtSafemount" type="text" class="txt c1 num" style="width:30%;"/>
 						</td>
 					</tr>
-					<tr>
+					<tr style="display: none;">
 						<td><span> </span><a id="lblHours" class="lbl"> </a></td>
 						<td>
 							<input id="txtHours" type="text" class="txt num" style="display: none;"/>
@@ -1503,11 +1503,10 @@
 							<input id="txtMemo" type="text" class="txt c1" style="width: 99%;"/>
 							<input type="hidden" id="txtImages" class="txt c1"/>
 						</td>
-						<td><span> </span><a id="lblRev" class="lbl"> </a></td>
-						<td>
-							<input id="txtRev" type="text" class="txt c1" style="width: 30%;"/>
-							<input id="btnUploadimg" type="button"  />
-						</td>
+						<!--<td><span> </span><a id="lblRev" class="lbl"> </a></td>
+						<td><input id="txtRev" type="text" class="txt c1" style="width: 30%;"/></td>-->
+						<td> </td>
+						<td><input id="btnUploadimg" type="button"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblMakes" class="lbl" style="font-size: 14px;"> </a></td>

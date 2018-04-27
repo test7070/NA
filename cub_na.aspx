@@ -17,8 +17,8 @@
 			this.errorHandler = null;
 			q_tables = 't';
 			var q_name = "cub";
-			var q_readonly = ['txtNoa','txtComp','txtProduct','txtWorker','txtWorker2','txtNotv','txtC1','txtOrdeno','txtNo2','textInano','txtEdate','txtSpec','txtMedate','textScolor','txtUnit'];
-			var q_readonlys = ['txtOrdeno', 'txtNo2','txtMo','txtW01'];
+			var q_readonly = ['txtNoa','txtComp','txtProduct','txtWorker','txtWorker2','txtNotv','txtC1','txtOrdeno','txtNo2','textInano','txtSpec','txtMedate','textScolor','txtUnit','txtItype','txtEdate'];
+			var q_readonlys = ['txtOrdeno', 'txtNo2','txtMo','txtW01','txtProductno2','txtProduct2','txtHmount'];
 			var q_readonlyt = [];
 			var bbmNum = [['txtMount',10,0,1],['txtNotv',10,0,1]];
 			var bbsNum = [];
@@ -37,11 +37,11 @@
 			aPop = new Array(
 				['txtOrdeno', '', 'view_ordes', 'noa,no2,productno,product,spec,mount,custno,comp,memo', 'txtOrdeno,txtNo2,txtProductno,txtProduct,txtSpec,txtMount,txtCustno,txtComp,txtMemo', ''],
 				['txtCustno', 'lblCust', 'cust', 'noa,nick,comp,tel,invoicetitle', 'txtCustno,txtComp', 'cust_b.aspx'],
-				['txtProductno', 'lblProduct', 'uca', 'noa,product,unit', 'txtProductno,txtProduct,txtUnit', 'ucaucc_b.aspx'],
+				['txtProductno', 'lblProduct', 'uca', 'noa,product,unit', 'txtProductno,txtProduct', 'ucaucc_b.aspx'],
 				['txtTggno_', '', 'tgg', 'noa,nick', 'txtTggno_,txtTgg_', ""],
 				['txtProcessno_', 'btnProcessno_', 'station', 'noa,station', 'txtProcessno_,txtProcess_', 'station_b.aspx'],
-				['txtProductno2_', 'btnProductno2_', 'mech', 'noa,mech', 'txtProductno2_,txtProduct2_', 'mech_b.aspx'],
-				['txtProductno__', 'btnProductno__', 'ucc', 'noa,product,spec,unit', 'txtProductno__,txtProduct__,txtSpec__,txtUnit__', 'ucaucc_b.aspx'],
+				//['txtProductno2_', '', 'mech', 'noa,mech', 'txtProductno2_,txtProduct2_', 'mech_b.aspx'],
+				['txtProductno__', 'btnProductno__', 'ucc', 'noa,product', 'txtProductno__,txtProduct__', 'ucc_b.aspx'],
 				['txtStoreno__', 'btnStoreno__', 'store', 'noa,store', 'txtStoreno__,txtStore__', 'store_b.aspx']
 				,['textCugtbstationno', '', 'station', 'noa,station', 'textCugtbstationno', ''],['textCugtestationno', '', 'station', 'noa,station', 'textCugtestationno', '']
 			);
@@ -77,8 +77,9 @@
 				bbmNum = [['txtMount',10,q_getPara('vcc.mountPrecision'),1],['txtPrice', 15, q_getPara('vcc.pricePrecision'), 1]
 				,['txtMo', 15, 0, 1],['txtNotv',10,q_getPara('vcc.mountPrecision'),1]];
 				bbsNum = [['txtMount', 15, q_getPara('vcc.mountPrecision'), 1],['txtPrice', 15, q_getPara('vcc.pricePrecision'), 1]
-				,['txtMo', 15, 0, 1],['txtW02', 15, 0, 1],['txtW01', 15, 0, 1],['txtW03', 4, 0, 1],['txtWmount', 15, q_getPara('vcc.mountPrecision'), 1]];
-				bbtNum = [['txtGmount', 15, q_getPara('vcc.mountPrecision'), 1]];
+				,['txtMo', 15, 0, 1],['txtW02', 15, 0, 1],['txtW01', 15, 0, 1],['txtW03', 4, 0, 1],['txtHmount', 4, 1, 1]
+				,['txtWeight', 15, q_getPara('vcc.weightPrecision'), 1],['txtWmount', 15, q_getPara('vcc.mountPrecision'), 1]];
+				bbtNum = [['txtGmount', 15, q_getPara('vcc.mountPrecision'), 1],['txtGweight', 15, q_getPara('vcc.weightPrecision'), 1],['txtHard', 15, 0, 1]];
 				q_mask(bbmMask);
 				
 				q_cmbParse("cmbTypea", 'M@M.一般鋼管,S@S.代工鋼管,K@K.樣品,D@D.研發,V@V.越南生產');
@@ -234,7 +235,8 @@
 					$('#div_cugtweek').html(tmp_checkbox);
 				});
 				
-				$('#txtBdate').blur(function() {
+				$('#btnDate2').click(function() {
+					var issaturday = (q_getPara('sys.saturday').toString()=='1'?'1':'0');
 					if(q_cur==1 || q_cur==2){
 						var t_where='1=0';
 						for (var i = 0; i < q_bbsCount; i++) {
@@ -245,20 +247,149 @@
 						}
 						t_where="where=^^ "+t_where+" ^^";
 						q_gt('station', t_where, 0, 0, 0, "getstation",r_accy,1);
+						//工作站 日產能
 						var tstation = _q_appendData("station", "", true);
-						var t_bdate=$('#txtBdate').val();
-						for (var i = q_bbsCount-1; i >=0; i--) {
-							var t_stationno=$.trim($('#txtProcessno_'+i).val());
-							var t_gen=8;
+						q_gt('stations', t_where, 0, 0, 0, "getstations",r_accy,1);
+						var tstations = _q_appendData("stations", "", true);
+						var t_bdate=$('#txtBdate').val();//開工日
+						q_gt('holiday', "where=^^ noa>='"+t_bdate+"' ^^ stop=100" , 0, 0, 0, "getholiday", r_accy,1);
+						var holiday = _q_appendData("holiday", "", true);
+						
+						//目前領料內容>會隨著製程變動								
+						var t_mount=0,t_weight=0,t_mm=0,t_put=0
+						for (var i = 0; i < q_bbtCount; i++) {
+							t_mount=q_add(t_mount,dec($('#txtGmount__'+i).val()));
+							t_weight=q_add(t_weight,dec($('#txtGweight__'+i).val()));
+							t_put=q_add(t_put,dec($('#txtHard__'+i).val()));
+							t_mm=q_add(t_mm,q_mul(dec($('#txtLengthb__'+i).val()),dec($('#txtGmount__'+i).val())));
+						}
+						
+						var t_endate='';
+						for (var i = 0; i < q_bbsCount; i++) {
+							var t_procno=$.trim($('#txtProcessno_'+i).val()); //製程
+							var t_mechno=$.trim($('#txtProductno2_'+i).val()); //機台
+							if(t_procno.length>0){
+								$('#txtDate2_'+i).val(t_bdate);
+							}
+								
+							//取得當天標準工時
+							var t_sgen=8;
 							for (var j = 0; j < tstation.length; j++) {
 								if(tstation[j].noa==t_stationno && dec(tstation[j].gen)>0){
-									t_gen=dec(tstation[j].gen);
+									t_sgen=dec(tstation[j].gen);
 									break;
 								}
 							}
-							q_gt('view_cugt', "where=^^stationno='"+t_stationno+"' and datea>='"+t_bdate+"' ^^ stop=100", 0, 0, 0, "getcugt", r_accy);
-						}
-						
+							q_gt('view_cugt', "where=^^stationno='"+t_procno+"' and datea>='"+t_bdate+"' ^^ stop=100", 0, 0, 0, "getcugt", r_accy,1);
+							var t_cugt = _q_appendData("view_cugt", "", true);
+							
+							//計算製程所需時數
+							var t_hours=0;
+							for (var j = 0; j < tstations.length; j++) {
+								if(tstations[j].noa==t_procno && tstations[j].mechno==t_mechno){
+									var t_unit=tstations[j].dayno; //單位
+									var t_gen=tstations[j].gen; //產能
+									if(t_unit.toUpperCase()=='把'){
+										t_hours=round(t_put/t_gen,1);
+									}
+									if(t_unit.toUpperCase()=='MM'){
+										t_hours=round(t_mm/t_gen,1);
+									}
+									if(t_unit.toUpperCase()=='米'){
+										t_hours=round(t_mm/1000/t_gen,1);
+									}
+									if(t_unit.toUpperCase()=='支'){
+										t_hours=round(t_mount/t_gen,1);
+									}
+									if(t_unit.toUpperCase()=='KG'){
+										t_hours=round(t_weight/t_gen,1);
+									}
+									
+									$('#txtHmount_'+i).val(t_hours);
+									break;
+								}
+							}
+							
+							//變動支數和長度
+							if(t_procno.toUpperCase()=='C'){//中切 變動 支數
+								//看輸入幾個欄位
+								var tcut=-1;
+								if(dec($('#textNeed1_'+i).val())>0){tcut++;}
+								if(dec($('#textNeed2_'+i).val())>0){tcut++;}
+								if(dec($('#textNeed3_'+i).val())>0){tcut++;}
+								if(dec($('#textNeed4_'+i).val())>0){tcut++;}
+								if(dec($('#textNeed5_'+i).val())>0){tcut++;}
+								if(dec($('#textNeed6_'+i).val())>0){tcut++;}
+								if(dec($('#textNeed7_'+i).val())>0){tcut++;}
+								if(dec($('#textNeed8_'+i).val())>0){tcut++;}
+								if(tcut>0){
+									t_mount=q_add(t_mount,tcut);
+								}
+							}
+							if(t_procno.toUpperCase()=='D'){//抽管 變動 長度
+								//第3個欄位為長度
+								if(dec($('#textNeed3_'+i).val())>0)
+									t_mm=q_mul(t_mount,dec($('#textNeed3_'+i).val()));
+							}
+							
+							//計算下個製程開工日
+							//取得當天gen
+							var t_wgen=t_sgen;
+			                for (var k = 0; k < t_cugt.length; k++) {
+			                	if(t_cugt[k].datea==t_bdate){
+			                		t_wgen=dec(t_cugt[k].gen);
+			                		break;
+			                	}
+			                }
+			                while(t_hours>=0){
+			                	t_hours=q_sub(t_hours,t_wgen);
+			                	t_endate=t_bdate;
+			                	t_bdate=q_cdn(t_bdate,1);
+			                	
+			                	var canwork=false;
+			                	while(!canwork){
+				                	var t_iswork=true;
+									var t_holidaywork=false; //假日主檔是否要上班
+				                	for(var k=0;k<holiday.length;k++){
+										if(holiday[k].noa==t_bdate){
+											if(holiday[k].iswork=="true"){
+												t_holidaywork=true;
+											}else{
+												t_iswork=false;
+											}
+										}
+									}
+									if(!t_holidaywork && t_iswork){//非假日主檔內
+										var week='';
+										if(t_bdate.length==10){
+											week=new Date(dec(t_bdate.substr(0,4)),dec(t_bdate.substr(5,2))-1,dec(t_bdate.substr(8,2))).getDay()
+										}else{
+											week=new Date(dec(t_bdate.substr(0,3))+1911,dec(t_bdate.substr(4,2))-1,dec(t_bdate.substr(7,2))).getDay();
+										}
+												
+										if(issaturday!='1' && week==6)
+											t_iswork=false;
+										if(week==0)
+											t_iswork=false;
+									}
+				                	
+				                	if(!t_iswork){
+				                		t_bdate=q_cdn(t_bdate,1);
+				                	}else{
+				                		canwork=true;
+				                	}
+				                }
+			                	
+			                	t_wgen=t_sgen;
+			                	for (var k = 0; k < t_cugt.length; k++) {
+				                	if(t_cugt[k].datea==t_bdate){
+				                		t_wgen=dec(t_cugt[k].gen);
+				                		break;
+				                	}
+				                }
+			                }//開工日end
+						}//製程bbs end
+						$('#txtEdate').val(t_endate);
 					}
 				});
 				
@@ -400,26 +531,53 @@
 								$('#txtNo2').val(b_ret[0].no2);
 								$('#txtProductno').val(b_ret[0].productno);
 								$('#txtProduct').val(b_ret[0].product);
-								$('#txtUnit').val(b_ret[0].unit);
 								$('#txtMount').val(b_ret[0].mount);
+								$('#txtIdime').val(b_ret[0].weight);
+								$('#txtItype').val(b_ret[0].stype);
 								$('#txtMemo').val(b_ret[0].memo);
 								$('#txtMedate').val(b_ret[0].datea);
+								$('#txtM1').val(b_ret[0].ucolor);
+								$('#txtM2').val(b_ret[0].scolor);
+								$('#txtM3').val(b_ret[0].radius);
+								$('#txtM4').val(b_ret[0].width);
+								$('#txtM5').val(b_ret[0].dime);
+								$('#txtM6').val(b_ret[0].lengthb);
+								
+								var t_pno=$('#txtProductno').val();
+					   			if(t_pno.length>0){
+						   			q_gt('uca', "where=^^ noa='" + t_pno + "' ^^", 0, 0, 0, "getuca",r_accy,1);
+									var as = _q_appendData("uca", "", true);
+									if(as[0]!=undefined){
+										for (var i = 0; i < q_bbtCount; i++) {
+											$('#btnMinut__'+i).click();
+										}
+										q_gridAddRow(bbtHtm, 'tbbt', 'txtProductno,txtProduct,txtRadiu,txtWidth,txtDime,txtLengthb'
+										, as.length, as, 'edate,style,groupino,groupjno,groupkno,grouplno', 'txtProductno');
+										
+									}
+									var as = _q_appendData("ucat", "", true)
+									if(as[0]!=undefined){
+										while(q_bbsCount<as.length){
+											$('#btnPlus').click();
+										}
+										for (var i = 0; i < q_bbsCount; i++) {
+											$('#btnMinus_'+i).click();
+										}
+										q_gridAddRow(bbsHtm, 'tbbs', 'txtProcessno,txtProcess'
+										, as.length, as, 'stationno,station', 'txtProcessno');
+									}
+								}
 							}
 						}
 						break;
-					case 'bbs_tgg':
+					case 'bbs_mech':
 						if (q_cur > 0 && q_cur < 4) {
 							if (!b_ret || b_ret.length == 0){
 								b_pop = '';
 								return;
 							}else{
-								$('#txtTggno_'+b_seq).val(b_ret[0].noa);
-								$('#txtTgg_'+b_seq).val(b_ret[0].nick);
-								if(b_ret[0].conn=='1'){
-									$('#chkSale_'+b_seq).prop('checked',true);
-								}else{
-									$('#chkSale_'+b_seq).prop('checked',false);
-								}
+								$('#txtProductno2_'+b_seq).val(b_ret[0].noa);
+								$('#txtProduct2_'+b_seq).val(b_ret[0].mech);
 							}
 						}
 						break;
@@ -468,7 +626,6 @@
 					$('#txtProductno').attr('disabled', 'disabled');
 					$('#txtSpec').attr('disabled', 'disabled');
 					$('#txtPrice').attr('disabled', 'disabled');
-					$('#txtUnit').attr('disabled', 'disabled');
 					$('#txtMo').attr('disabled', 'disabled');
 					$('#txtMemo').attr('disabled', 'disabled');
 				}
@@ -487,7 +644,6 @@
 							$('#txtTgg_'+i).attr('disabled', 'disabled');
 							$('#btnTggno_'+i).attr('disabled', 'disabled');
 							$('#txtMount_'+i).attr('disabled', 'disabled');
-							$('#txtUnit_'+i).attr('disabled', 'disabled');
 							$('#txtPrice_'+i).attr('disabled', 'disabled');
 							$('#txtMo_'+i).attr('disabled', 'disabled');
 							$('#chkSale_'+i).attr('disabled', 'disabled');
@@ -532,46 +688,7 @@
 		            	return;
 		            }
 				}
-				
-				//105/10/03 當最後一筆有KEY 工作天數才計算預估完工日
-				if(!emp($('#txtBdate').val())){
-					var t_w03=0,isw03=0;
-					for (var j = 0; j < q_bbsCount; j++) {
-						t_w03=q_add(t_w03,$('#txtW03_'+j).val());
-						if(!emp($('#txtProcessno_'+j).val())){
-							isw03=dec($('#txtW03_'+j).val());
-						}
-					}
-					if(isw03!=0){
-						var t_year=dec($('#txtBdate').val().substr(0,r_len));
-						var t_mon=dec($('#txtBdate').val().substr(r_len+1,2))-1;
-						var t_day=dec($('#txtBdate').val().substr(r_lenm+1,2));
-						if(r_len==3)
-							t_year=t_year+1911;
-						var t_datea=new Date(t_year,t_mon,t_day);
-							
-						while(t_w03>0){
-							t_datea.setDate(t_datea.getDate()+1);
-							if(t_datea.getDay()!=0 && t_datea.getDay()!=6){
-								t_w03--;
-							}
-						}
-						t_year=t_datea.getFullYear();
-						t_mon=t_datea.getMonth();
-						t_day=t_datea.getDate();
 								
-						if(r_len==3)
-							t_year=t_year-1911;
-						t_year=('0000'+(t_year).toString()).slice(-1*r_len);
-						t_mon=('00'+(t_mon+1).toString()).slice(-2);
-						t_day=('00'+(t_day).toString()).slice(-2);
-								
-						$('#txtEdate').val(t_year+'/'+t_mon+'/'+t_day);
-					}else{
-						$('#txtEdate').val('');
-					}
-				}
-				
 				sum();
 				
 				if(q_cur==1)
@@ -633,11 +750,13 @@
 					$('#btnUpdata').attr('disabled', 'disabled');
 					$('#btnOrdes').attr('disabled', 'disabled');
 					$("[name='checkCut']").attr('disabled', 'disabled');
+					$('#btnDate2').attr('disabled', 'disabled');
 					$('#btnCugt2').removeAttr('disabled');
 				}else{
 					$('#btnUpdata').removeAttr('disabled');
 					$('#btnOrdes').removeAttr('disabled');
 					$("[name='checkCut']").removeAttr('disabled');
+					$('#btnDate2').removeAttr('disabled');
 					$('#btnCugt2').attr('disabled', 'disabled');
 				}
 			}
@@ -670,141 +789,24 @@
                             }
 						});
 						
-						$('#txtOrdeno_' + i).click(function() {
-                            t_IdSeq = -1;
-                            q_bodyId($(this).attr('id'));
-                            b_seq = t_IdSeq;
-                            var t_rc2no = $.trim($("#txtOrdeno_" + b_seq).val());
-                            if (t_rc2no.length > 0) {
-                                var t_where = "noa='" + t_rc2no + "'";
-                                q_box("rc2.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, q_name, "98%", "98%", q_getMsg("popSeek"));
-                            }
-                        });
-						
-						$('#btnTggno_'+i).click(function() {
+						$('#btnProductno2_'+i).click(function() {
 							t_IdSeq = -1;  /// 要先給  才能使用 q_bodyId()
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
-							t_where = "noa in (select tggno from processs where noa='"+$('#txtProcessno_'+b_seq).val()+"') or noa='"+$('#txtTggno_'+b_seq).val()+"'";
-							q_box("tgg_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'bbs_tgg', "500px", "680px", "");
-						});
-						
-						$('#txtTggno_'+i).change(function() {
-							var t_n=$(this).attr('id').split('_')[1];
-							q_gt('tgg', "where=^^ noa='" + $('#txtTggno_'+t_n).val() + "' ^^", 0, 0, 0, "gettggs",r_accy,1);
-							var as = _q_appendData("tgg", "", true);
-							if(as[0]!=undefined){
-								$('#txtTggno_'+t_n).val(as[0].noa);
-								$('#txtTgg_'+t_n).val(as[0].nick);
-								if(as[0].conn=='1'){
-									$('#chkSale_'+t_n).prop('checked',true);
-								}else{
-									$('#chkSale_'+t_n).prop('checked',false);
-								}
+							if(!emp($('#txtProcessno_'+b_seq).val())){
+								t_where = "noa in (select mechno from stations where noa='"+$('#txtProcessno_'+b_seq).val()+"')";
+								q_box("mech_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'bbs_mech', "500px", "680px", "");
 							}
 						});
-						
-						$('#chkCut_'+i).click(function() {
-							t_IdSeq = -1; 
-							q_bodyId($(this).attr('id'));
-							b_seq = t_IdSeq;
-							if($(this).prop('checked') && emp($('#txtDatea_'+b_seq).val())){
-								$('#txtDatea_'+b_seq).val(q_date());
-							}
-						});
-						
-						$('#txtMount_' + i).change(function() {    
-                        	t_IdSeq = -1;
-                            q_bodyId($(this).attr('id'));
-                            b_seq = t_IdSeq;  	
-                            if(dec($('#txtMount_' + b_seq).val())>0 && dec($('#txtPrice_' + b_seq).val())>0){
-                            	t_mount = dec($('#txtMount_' + b_seq).val());
-                            	t_price = dec($('#txtPrice_' + b_seq).val());
-                            	$('#txtMo_' + b_seq).val(round(q_mul(t_mount,t_price),0));
-                            	if ($('#chkSale_' + b_seq).is(':checked')) {
-	                                var t_taxrate = q_div(parseFloat(q_getPara('sys.taxrate')), 100);
-	                                $('#txtW02_' + b_seq).css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
-	                                $('#txtW02_' + b_seq).val(round(q_mul(dec($('#txtMo_' + b_seq).val()), t_taxrate), 0));
-	                            }
-                            	$('#txtW01_' + b_seq).val(q_add(dec($('#txtW02_' + b_seq).val()), dec($('#txtMo_' + b_seq).val())));
-                            }                    			                	
-                        });
-						
-						$('#txtPrice_' + i).change(function() {
-                        	t_IdSeq = -1;
-                            q_bodyId($(this).attr('id'));
-                            b_seq = t_IdSeq;  	
-                            if(dec($('#txtMount_' + b_seq).val())>0 && dec($('#txtPrice_' + b_seq).val())>0){
-                            	t_mount = dec($('#txtMount_' + b_seq).val());
-                            	t_price = dec($('#txtPrice_' + b_seq).val());
-                            	$('#txtMo_' + b_seq).val(round(q_mul(t_mount,t_price),0));
-                            	if ($('#chkSale_' + b_seq).is(':checked')) {
-	                                var t_taxrate = q_div(parseFloat(q_getPara('sys.taxrate')), 100);
-	                                $('#txtW02_' + b_seq).css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
-	                                $('#txtW02_' + b_seq).val(round(q_mul(dec($('#txtMo_' + b_seq).val()), t_taxrate), 0));
-	                            }
-                            	$('#txtW01_' + b_seq).val(q_add(dec($('#txtW02_' + b_seq).val()), dec($('#txtMo_' + b_seq).val())));
-                            }   
-                        });
-						
-						if ($('#chkSale_' + i).is(':checked'))
-                            $('#txtW02_' + i).css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
-						
-						$('#chkSale_' + i).change(function() {
-                            t_IdSeq = -1;
-                            q_bodyId($(this).attr('id'));
-                            b_seq = t_IdSeq;
-                            if ($('#chkSale_' + b_seq).is(':checked')) {
-                                var t_taxrate = q_div(parseFloat(q_getPara('sys.taxrate')), 100);
-                                $('#txtW02_' + b_seq).css('color', 'green').css('background', 'RGB(237,237,237)').attr('readonly', 'readonly');
-                                $('#txtW02_' + b_seq).val(round(q_mul(dec($('#txtMo_' + b_seq).val()), t_taxrate), 0));
-                            } else
-                                $('#txtW02_' + b_seq).css('color', 'black').css('background', 'white').removeAttr('readonly');
-							
-							$('#txtW01_' + b_seq).val(q_add(dec($('#txtW02_' + b_seq).val()), dec($('#txtMo_' + b_seq).val())));
-                        })
-                        
-                        $('#txtW02_' + i).change(function() {
-                            t_IdSeq = -1;
-                            q_bodyId($(this).attr('id'));
-                            b_seq = t_IdSeq;
-							
-							$('#txtW01_' + b_seq).val(q_add(dec($('#txtW02_' + b_seq).val()), dec($('#txtMo_' + b_seq).val())));
-                        });
-                        
-                        $('#txtW03_' + i).change(function() {
-                            t_IdSeq = -1;
-                            q_bodyId($(this).attr('id'));
-                            b_seq = t_IdSeq;
-							
-                        });
 					}
 				}
 				_bbsAssign();
-				if(q_cur==1 || q_cur==2){
-					$("[name='checkCut']").removeAttr('disabled');
-				}else{
-					$("[name='checkCut']").attr('disabled', 'disabled');
-				}
-				$("[name='checkCut']").unbind('click');
-				$("[name='checkCut']").click(function() {
-					if((q_cur==1 || q_cur==2)){
-						for (var j = 0; j < q_bbsCount; j++) {
-							if($("[name='checkCut']").prop('checked')){
-								$('#chkCut_'+j).prop('checked',true);
-								$('#chkCut_'+j).click();
-								$('#chkCut_'+j).prop('checked',true);	
-							}else{
-								$('#chkCut_'+j).prop('checked',false);
-							}
-						}
-					}
-				});
+				
 				
 				$('.needs').each(function(index) {
 					$(this).unbind('change');
 					$(this).change(function() {
-						var n=$(this).attr('id').split('__')[1];
+						var n=$(this).attr('id').split('_')[1];
 						var t_need='';
 						for(var k=1;k<=8;k++){
 							t_need=t_need+'@,#'+$('#textNeed'+k+'_'+n).val();
@@ -948,12 +950,13 @@
 								$('#txtM4').val(as[0].groupfno);
 								$('#txtM5').val(as[0].groupgno);
 								$('#txtM6').val(as[0].grouphno);
-								$('#txtM7').val(as[0].edate);
-								$('#txtM8').val(as[0].style);
-								$('#txtM9').val(as[0].groupino);
-								$('#txtM10').val(as[0].groupjno);
-								$('#txtM11').val(as[0].groupkno);
-								$('#txtM12').val(as[0].grouplno);
+								
+								for (var i = 0; i < q_bbtCount; i++) {
+									$('#btnMinut__'+i).click();
+								}
+								q_gridAddRow(bbtHtm, 'tbbt', 'txtProductno,txtProduct,txtRadiu,txtWidth,txtDime,txtLengthb'
+								, as.length, as, 'edate,style,groupino,groupjno,groupkno,grouplno', 'txtProductno');
+								
 							}
 							var as = _q_appendData("ucat", "", true)
 							if(as[0]!=undefined){
@@ -1233,6 +1236,13 @@
 						<td><span> </span><a id="lblProduct" class="lbl btn" >製成品</a></td>
 						<td><input id="txtProductno" type="text" class="txt c1"/></td>
 						<td colspan="2"><input id="txtProduct" type="text" class="txt c1"/></td>
+						<td><span> </span><a id="lblItype_na" class="lbl" >訂單類別</a></td>
+						<td><input id="txtItype" type="text" class="txt c1" style="width:35%;"/>
+							<span style="float: left;margin-left: 15px;"> </span>
+							<a id="lblMenda_na" class="lbl" style="float: left;">定尺</a>
+							<span style="float: left;"> </span>
+							<input id="chkMenda" type="checkbox"/>
+						</td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblM1_na" class="lbl">成品材質</a></td>
@@ -1256,56 +1266,34 @@
 						</td>
 					</tr>
 					<tr>
-						<td><span> </span><a id="lblM7_na" class="lbl">素材材質</a></td>
-						<td>
-							<input id="txtM7" type="text" class="txt c1" style="width:40%;"/>
-							<input id="txtM8" type="text" class="txt c1" style="width:55%;"/>
-						</td>
-						<td><span> </span><a id="lblM9_na" class="lbl" >短徑</a></td>
-						<td><input id="txtM9" type="text" class="txt c1 num" style="width:35%;"/>
-							<span style="float: left;margin-left: 15px;"> </span>
-							<a id="lblM10_na" class="lbl" style="float: left;">長徑</a>
-							<span style="float: left;"> </span>
-							<input id="txtM10" type="text" class="txt c1 num" style="width:35%;"/>
-						</td>
-						<td><span> </span><a id="lblM11_na" class="lbl" >厚度</a></td>
-						<td><input id="txtM11" type="text" class="txt c1 num" style="width:35%;"/>
-							<span style="float: left;margin-left: 15px;"> </span>
-							<a id="lblM12_na" class="lbl" style="float: left;">長度</a>
-							<span style="float: left;"> </span>
-							<input id="txtM12" type="text" class="txt c1 num" style="width:35%;"/>
-						</td>
-					</tr>
-					<tr>
 						<td><span> </span><a id="lblMount_na" class="lbl" >預計/支</a></td>
 						<td><input id="txtMount" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblBdime_na" class="lbl" >數量/KG</a></td>
-						<td><input id="txtBdime" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblC1" class="lbl" >已交量</a></td>
-						<td><input id="txtC1" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblIdime_na" class="lbl" >產量/KG</a></td>
+						<td><input id="txtIdime" type="text" class="txt num c1"/></td>
 					</tr>
 					<tr>
+						<td><span> </span><a id="lblC1" class="lbl" >已交量</a></td>
+						<td><input id="txtC1" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblNotv" class="lbl" >未交量</a></td>
+						<td><input id="txtNotv" type="text" class="txt num c1"/></td>
+						<td><span> </span><a id="lblInano" class="lbl" >入庫單號</a></td>
+						<td><input id="textInano" type="text" class="txt c1"/></td>
+					</tr>
+					<tr style="display: none;">
 						<td><span> </span><a id="lblPrice_na" class="lbl" >單價</a></td>
 						<td><input id="txtPrice" type="text" class="txt num c1"/></td>
 						<td><span> </span><a id="lblMoney" class="lbl" >總計</a></td>
 						<td><input id="txtMo" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblNotv" class="lbl" >未交量</a></td>
-						<td><input id="txtNotv" type="text" class="txt num c1"/></td>
-					</tr>
-					<tr>
-						<td><span> </span><a id="lblIdime_na" class="lbl" >下料/支</a></td>
-						<td><input id="txtIdime" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblEdime_na" class="lbl" >產量/KG</a></td>
-						<td><input id="txtEdime" type="text" class="txt num c1"/></td>
-						<td><span> </span><a id="lblInano" class="lbl" >入庫單號</a></td>
-						<td><input id="textInano" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblBdate_na" class="lbl" >預定開工日</a></td>
 						<td><input id="txtBdate" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblEdate_na" class="lbl" >預估完工日</a></td>
 						<td><input id="txtEdate" type="text" class="txt c1"/></td>
-						<td><input id="btnCugt2" type="button" value="產能批次調整" style="float:right;"/></td>
+						<td colspan="2">
+							<input id="btnDate2" type="button" value="製程開工日試算" style="float:center;"/>
+							<input id="btnCugt2" type="button" value="產能批次調整" style="float:center;"/>
+						</td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblMemo2_na" class="lbl">特殊要求</a></td>
@@ -1338,23 +1326,25 @@
 					<td style="width:20px;"> </td>
 					<td style="width:150px;"><a id='lblProcess_na_s'>製程</a></td>
 					<td style="width:40px;"><a id='lblCugt_na_s'>產能編制</a></td>
-					<td style="width:60px;"><a id='lblNeed1_na_s'>製程備註1</a></td>
-					<td style="width:60px;"><a id='lblNeed2_na_s'>製程備註2</a></td>
-					<td style="width:60px;"><a id='lblNeed3_na_s'>製程備註3</a></td>
-					<td style="width:60px;"><a id='lblNeed4_na_s'>製程備註4</a></td>
-					<td style="width:60px;"><a id='lblNeed5_na_s'>製程備註5</a></td>
-					<td style="width:60px;"><a id='lblNeed6_na_s'>製程備註6</a></td>
-					<td style="width:60px;"><a id='lblNeed7_na_s'>製程備註7</a></td>
-					<td style="width:60px;"><a id='lblNeed8_na_s'>製程備註8</a></td>
+					<td style="width:60px;"><a id='lblNeed1_na_s'>製程備註<BR>1</a></td>
+					<td style="width:60px;"><a id='lblNeed2_na_s'>製程備註<BR>2</a></td>
+					<td style="width:60px;"><a id='lblNeed3_na_s'>製程備註<BR>3</a></td>
+					<td style="width:60px;"><a id='lblNeed4_na_s'>製程備註<BR>4</a></td>
+					<td style="width:60px;"><a id='lblNeed5_na_s'>製程備註<BR>5</a></td>
+					<td style="width:60px;"><a id='lblNeed6_na_s'>製程備註<BR>6</a></td>
+					<td style="width:60px;"><a id='lblNeed7_na_s'>製程備註<BR>7</a></td>
+					<td style="width:60px;"><a id='lblNeed8_na_s'>製程備註<BR>8</a></td>
 					<td style="width:150px;"><a id='lblProductno2_na_s'>機台</a></td>
 					<td style="width:50px;"><a id='lblHmount_na_s'>工時</a></td>
+					<td style="width:90px;"><a id='lblDate2_na_s'>指定開工日</a></td>
+					<td style="width:50px;"><a id='lblMount_na_s'>完工<BR>支數</a></td>
+					<td style="width:50px;"><a id='lblWeight_na_s'>完工<BR>重量</a></td>
+					<td style="width:50px;"><a id='lblWmount_na_s'>完工<BR>把數</a></td>
 					<td style="width:50px;"><a id='lblEnda_na_s'>完工</a></td>
 					
-					<!--<td style="width:100px;"><a id='lblDate2_na_s'>指定開工日</a></td>
-					<td style="width:80px;"><a id='lblWmount_na_s'>已入庫數</a></td>
+					<!--
 					<td style="width:140px;"><a id='lblTgg_na_s'>廠商簡稱</a></td>
 					<td style="width:80px;"><a id='lblMount_na_s'>請款數量</a></td>
-					<td style="width:40px;"><a id='lblUnit_na_s'>單位</a></td>
 					<td style="width:70px;"><a id='lblPrice_na_s'>單價</a></td>
 					<td style="width:100px;"><a id='lblMoney_na_s'>金額</a></td>
 					<td style="width:40px;"><a id='lblSale_na_s'>外加稅</a></td>
@@ -1391,21 +1381,23 @@
 					<td><input id="textNeed8.*" type="text" class="txt c1 needs"/></td>
 					<td>
 						<input id="txtProductno2.*" type="text" class="txt c1" style="width: 25%;"/>
-						<input class="btn" id="btntxtProductno2.*" type="button" value='.' style=" font-weight: bold;" />
+						<input class="btn" id="btnProductno2.*" type="button" value='.' style=" font-weight: bold;" />
 						<input id="txtProduct2.*" type="text" class="txt c1" style="width: 55%;"/>
 					</td>
 					<td><input id="txtHmount.*" type="text" class="txt num c1"/></td>
+					<td><input id="txtDate2.*" type="text" class="txt c1"/></td>
+					<td><input id="txtMount.*" type="text" class="txt num c1"/></td>
+					<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
+					<td><input id="txtWmount.*" type="text" class="txt num c1"/></td>
 					<td><input id="chkEnda.*" type="checkbox" class="txt c1"/></td>
 					
-					<!--<td><input id="txtDate2.*" type="text" class="txt c1"/></td>
-					<td><input id="txtWmount.*" type="text" class="txt num c1"/></td>
+					<!--
 					<td>
 						<input id="txtTggno.*" type="text" class="txt c1" style="width: 80%;"/>
 						<input class="btn" id="btnTggno.*" type="button" value='.' style=" font-weight: bold;" />
 						<input id="txtTgg.*" type="text" class="txt c1"/>
 					</td>
 					<td><input id="txtMount.*" type="text" class="txt c1 num"/></td>
-					<td><input id="txtUnit.*" type="text" class="txt c1"/></td>
 					<td><input id="txtPrice.*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtMo.*" type="text" class="txt c1 num"/></td>
 					<td><input id="chkSale.*" type="checkbox" class="txt c1" /></td>
@@ -1424,13 +1416,17 @@
 				<tr class="head" style="color:white; background:#003366;">
 					<td style="width:20px;"><input id="btnPlut" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
 					<td style="width:20px;"> </td>
-					<td style="width:150px; text-align: center;">領料編號</td>
-					<td style="width:200px; text-align: center;">領料名稱</td>
-					<td style="width:200px; text-align: center;">規格</td>
-					<td style="width:40px; text-align: center;">單位</td>
-					<td style="width:100px; text-align: center;">領料數量</td>
+					<td style="width:140px; text-align: center;"><a id="lblUno_na">批號</a></td>
+					<td style="width:150px; text-align: center;"><a id="lblProductno_na">素材材質</a></td>
+					<td style="width:60px; text-align: center;"><a id="lblRadius_na">短徑</a></td>
+					<td style="width:60px; text-align: center;"><a id="lblWidth_na">長徑</a></td>
+					<td style="width:60px; text-align: center;"><a id="lblDime_na">厚度</a></td>
+					<td style="width:60px; text-align: center;"><a id="lblLengthb_na">長度</a></td>
+					<td style="width:80px; text-align: center;"><a id="lblGmount_na">下料/支</a></td>
+					<td style="width:80px; text-align: center;"><a id="lblGweight_na">重量/KG</a></td>
+					<td style="width:80px; text-align: center;"><a id="lblHard_na">下料/把</a></td>
 					<td style="width:120px; text-align: center;">領料倉</td>
-					<td style="width:200px; text-align: center;">備註</td>
+					<td style="width:140px; text-align: center;">備註</td>
 				</tr>
 				<tr>
 					<td>
@@ -1438,18 +1434,23 @@
 						<input class="txt" id="txtNoq..*" type="text" style="display: none;"/>
 					</td>
 					<td><a id="lblNo..*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
+					<td><input id="txtUno..*" type="text" class="txt c1"/></td>
 					<td>
-						<input id="txtProductno..*" type="text" class="txt c1" style="width: 85%;"/>
+						<input id="txtProductno..*" type="text" class="txt c1" style="width: 30%;"/>
 						<input class="btn" id="btnProductno..*" type="button" value='.' style=" font-weight: bold;" />
+						<input id="txtProduct..*" type="text" class="txt c1" style="width: 50%;"/>
 					</td>
-					<td><input id="txtProduct..*" type="text" class="txt c1"/></td>
-					<td><input id="txtSpec..*" type="text" class="txt c1"/></td>
-					<td><input id="txtUnit..*" type="text" class="txt c1"/></td>
+					<td><input id="txtRadius..*" type="text" class="txt c1 num"/></td>
+					<td><input id="txtWidth..*" type="text" class="txt c1 num"/></td>
+					<td><input id="txtDime..*" type="text" class="txt c1 num"/></td>
+					<td><input id="txtLengthb..*" type="text" class="txt c1 num"/></td>
 					<td><input id="txtGmount..*" type="text" class="txt c1 num"/></td>
+					<td><input id="txtGweight..*" type="text" class="txt c1 num"/></td>
+					<td><input id="txtHard..*" type="text" class="txt c1 num"/></td>
 					<td>
 						<input id="txtStoreno..*" type="text" class="txt c1" style="width: 30%"/>
 						<input class="btn" id="btnStoreno..*" type="button" value='.' style=" font-weight: bold;" />
-						<input id="txtStore..*" type="text" class="txt c1" style="width: 50%"/>
+						<input id="txtStore..*" type="text" class="txt c1" style="width: 45%"/>
 					</td>
 					<td><input id="txtMemo..*" type="text" class="txt c1"/></td>
 				</tr>

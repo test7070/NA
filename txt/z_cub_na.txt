@@ -35,11 +35,11 @@ declare @tmp table(
 )
 
 insert into @tmp
-select '99',b.processno,b.process,b.date2,isnull(d.gen,c.hours)
-,b.mount*case when isnull(c.minutes,0)>0 then c.minutes/60 else c.sec/60/60 end
+select '99',b.processno,b.process,b.date2,isnull(e.gen,c.gen)*d.counts,b.hmount
 from view_cub a left join view_cubs b on a.noa=b.noa
-left join process c on b.processno=c.noa
-outer apply (select top 1 * from view_cugt where datea=a.datea and stationno=b.processno)d
+left join station c on b.processno=c.noa
+outer apply (select count(*)counts from stations where noa=c.noa)d --機台數
+outer apply (select top 1 * from view_cugt where datea=a.datea and stationno=b.processno)e
 where b.date2 between @t_bdate and @t_edate
 and b.processno between @t_bproc and @t_eproc
 and a.productno between @t_bpno and @t_epno
@@ -103,12 +103,11 @@ declare @tmp table(
 
 insert into @tmp
 select '99',b.processno,b.process,a.productno,a.product,b.date2
-,case when isnull(c.minutes,0)=0 and isnull(c.sec,0)=0 then null when isnull(c.sec,0)>0 then cast(round(c.sec,3) as nvarchar) + ' Sec.' when isnull(c.minutes,0)>0 then cast(round(c.minutes,3) as nvarchar) + ' Min.' end
-+case when len(d.unit)>0 then '/ '+d.unit else '' end
-,b.mount,a.notv
+,cast(d.gen as nvarchar)+'/'+d.dayno
+,b.hmount,a.notv
 from view_cub a left join view_cubs b on a.noa=b.noa
-left join process c on b.processno=c.noa
-left join uca d on a.productno=d.noa
+left join station c on c.noa=b.processno
+left join stations d on d.noa=b.processno and d.mechno=b.productno2
 where b.date2 between @t_bdate and @t_edate
 and b.processno between @t_bproc and @t_eproc
 and a.productno between @t_bpno and @t_epno
