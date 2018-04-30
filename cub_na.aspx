@@ -101,7 +101,7 @@
 						if (!emp($('#txtOrdeno').val()))
 							t_where += " and charindex(a.noa,'" + $('#txtOrdeno').val() + "')>0 ";
 						t_where = t_where;
-						q_box("ordes_b_xy.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'ordes', "95%", "650px", q_getMsg('popOrde'));
+						q_box("ordes_b_na.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'ordes', "95%", "650px", q_getMsg('popOrde'));
 					}
 				});
 				
