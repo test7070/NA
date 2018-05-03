@@ -17,7 +17,7 @@
 			this.errorHandler = null;
 			q_tables = 't';
 			var q_name = "cub";
-			var q_readonly = ['txtNoa','txtComp','txtProduct','txtWorker','txtWorker2','txtNotv','txtC1','txtOrdeno','txtNo2','textInano','txtSpec','txtMedate','textScolor','txtUnit','txtItype','txtEdate'];
+			var q_readonly = ['txtNoa','txtComp','txtProduct','txtWorker','txtWorker2','txtNotv','txtC1','txtOrdeno','txtNo2','textInano','txtSpec','txtMedate','textScolor','txtUnit','txtItype','txtEdate','txtM8','txtM2'];
 			var q_readonlys = ['txtOrdeno', 'txtNo2','txtMo','txtW01','txtProductno2','txtProduct2','txtHmount'];
 			var q_readonlyt = [];
 			var bbmNum = [['txtMount',10,0,1],['txtNotv',10,0,1]];
@@ -44,6 +44,8 @@
 				['txtProductno__', 'btnProductno__', 'ucc', 'noa,product', 'txtProductno__,txtProduct__', 'ucc_b.aspx'],
 				['txtStoreno__', 'btnStoreno__', 'store', 'noa,store', 'txtStoreno__,txtStore__', 'store_b.aspx']
 				,['textCugtbstationno', '', 'station', 'noa,station', 'textCugtbstationno', ''],['textCugtestationno', '', 'station', 'noa,station', 'textCugtestationno', '']
+				,['txtStyle__', 'btnStyle__', 'style', 'noa,product', 'txtStyle__', 'style_b.aspx']
+				,['txtM7', 'lblM7', 'style', 'noa,product', 'txtM7,txtM8', 'style_b.aspx']
 			);
 
 			$(document).ready(function() {
@@ -255,6 +257,11 @@
 						q_gt('holiday', "where=^^ noa>='"+t_bdate+"' ^^ stop=100" , 0, 0, 0, "getholiday", r_accy,1);
 						var holiday = _q_appendData("holiday", "", true);
 						
+						if(t_bdate.length==0){
+							t_bdate=q_cdn(q_date(),1);
+							$('#txtBdate').val(q_cdn(q_date(),1));
+						}
+						
 						//目前領料內容>會隨著製程變動								
 						var t_mount=0,t_weight=0,t_mm=0,t_put=0
 						for (var i = 0; i < q_bbtCount; i++) {
@@ -288,7 +295,7 @@
 							for (var j = 0; j < tstations.length; j++) {
 								if(tstations[j].noa==t_procno && tstations[j].mechno==t_mechno){
 									var t_unit=tstations[j].dayno; //單位
-									var t_gen=tstations[j].gen; //產能
+									var t_gen=dec(tstations[j].gen); //產能
 									if(t_unit.toUpperCase()=='把'){
 										t_hours=round(t_put/t_gen,1);
 									}
@@ -391,6 +398,14 @@
 						}//製程bbs end
 						$('#txtEdate').val(t_endate);
 					}
+				});
+				
+				$('#btnOK_div_in').click(function() { //入庫
+				});
+				$('#btnOK2_div_in').click(function() { //退件
+				});
+				$('#btnClose_div_in').click(function() {
+					$('#div_in').hide();
 				});
 				
 			}
@@ -542,6 +557,23 @@
 								$('#txtM4').val(b_ret[0].width);
 								$('#txtM5').val(b_ret[0].dime);
 								$('#txtM6').val(b_ret[0].lengthb);
+								$('#txtM7').val(b_ret[0].style);
+								$('#txtM7').change();
+								
+								if(b_ret[0].noa.length>0){
+									q_gt('view_orde', "where=^^ noa='" + b_ret[0].noa + "' ^^", 0, 0, 0, "getorde",r_accy,1);
+									var as = _q_appendData("view_orde", "", true);
+									if(as[0]!=undefined){
+										var tstype=q_getPara('orde.stype').split(',');
+										for(var i=0;i<tstype.length;i++){
+											if(tstype[i].split('@')[0]==as[0].stype){
+												$('#txtItype').val(tstype[i].split('@')[1]);
+												break;
+											}
+										}
+									}
+								}
+								
 								
 								var t_pno=$('#txtProductno').val();
 					   			if(t_pno.length>0){
@@ -552,7 +584,7 @@
 											$('#btnMinut__'+i).click();
 										}
 										q_gridAddRow(bbtHtm, 'tbbt', 'txtProductno,txtProduct,txtRadiu,txtWidth,txtDime,txtLengthb'
-										, as.length, as, 'edate,style,groupino,groupjno,groupkno,grouplno', 'txtProductno');
+										, as.length, as, 'edate,engprono,groupino,groupjno,groupkno,grouplno', 'txtProductno');
 										
 									}
 									var as = _q_appendData("ucat", "", true)
@@ -798,6 +830,65 @@
 								q_box("mech_b.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'bbs_mech', "500px", "680px", "");
 							}
 						});
+						
+						$('#btnIn_'+i).click(function(e) {
+							t_IdSeq = -1;  /// 要先給  才能使用 q_bodyId()
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if(!emp($('#txtProductno').val()) && !emp($('#txtProcessno_'+b_seq).val()) && !(q_cur==1 && q_cur==2)){
+								$('#textCubno').val($('#txtNoa').val());
+								$('#textProductno').val($('#txtProductno').val());
+								$('#textProduct').val($('#txtProduct').val());
+								$('#textStyle').val($('#txtM8').val());
+								$('#textScolor').val($('#txtM2').val());
+								$('#textRadius').val($('#txtM3').val());
+								$('#textWidth').val($('#txtM4').val());
+								$('#textDime').val($('#txtM5').val());
+								$('#textLengthb').val($('#txtM6').val());
+								$('#textMount').val($('#txtMount').val());
+								$('#textWeight').val($('#txtIdime').val());
+								$('#textStation').val($('#txtProcess_'+b_seq).val());
+								$('#textMech').val($('#txtProduct2_'+b_seq).val());
+								$('#textMemo1').val($('#textNeed1_'+b_seq).val());
+								$('#textMemo2').val($('#textNeed2_'+b_seq).val());
+								$('#textMemo3').val($('#textNeed3_'+b_seq).val());
+								$('#textMemo4').val($('#textNeed4_'+b_seq).val());
+								$('#textMemo5').val($('#textNeed5_'+b_seq).val());
+								$('#textMemo6').val($('#textNeed6_'+b_seq).val());
+								$('#textMemo7').val($('#textNeed7_'+b_seq).val());
+								$('#textMemo8').val($('#textNeed8_'+b_seq).val());
+								$('#textErrmount').val('');
+								$('#textErrweight').val('');
+								$('#textFixmount').val('');
+								$('#textFixweight').val('');
+								$('#textInmount').val('');
+								$('#textInweight').val('');
+								$('#textInput').val('');
+								$('#textWorker').val(r_name);
+								$('#textBmount').val('');
+								$('#textBweight').val('');
+								$('#textBmemo').val('');
+								var t_pn=dec(b_seq)-1;
+								if(t_pn>=0){
+									$('#textPrestation').val($('#txtProcess_'+t_pn).val());
+									$('#textPremech').val($('#txtProduct2_'+t_pn).val());
+									$('#textPreinmount').val($('#txtMount_'+t_pn).val());
+									$('#textPreinweight').val($('#txtWeight_'+t_pn).val());
+									$('#textPreinput').val($('#txtWmount_'+t_pn).val());
+									$('#textPreworker').val('');
+								}else{
+									$('#textPrestation').val('');
+									$('#textPremech').val('');
+									$('#textPreinmount').val('');
+									$('#textPreinweight').val('');
+									$('#textPreinput').val('');
+									$('#textPreworker').val('');
+								}
+								$('#div_in').css('top', e.pageY);
+								$('#div_in').css('left', e.pageX-$('#div_in').width());
+								$('#div_in').show();
+							}
+						});
 					}
 				}
 				_bbsAssign();
@@ -950,12 +1041,14 @@
 								$('#txtM4').val(as[0].groupfno);
 								$('#txtM5').val(as[0].groupgno);
 								$('#txtM6').val(as[0].grouphno);
+								$('#txtM7').val(as[0].style);
+								$('#txtM8').val(as[0].team);
 								
 								for (var i = 0; i < q_bbtCount; i++) {
 									$('#btnMinut__'+i).click();
 								}
 								q_gridAddRow(bbtHtm, 'tbbt', 'txtProductno,txtProduct,txtRadiu,txtWidth,txtDime,txtLengthb'
-								, as.length, as, 'edate,style,groupino,groupjno,groupkno,grouplno', 'txtProductno');
+								, as.length, as, 'edate,engprono,groupino,groupjno,groupkno,grouplno', 'txtProductno');
 								
 							}
 							var as = _q_appendData("ucat", "", true)
@@ -1181,6 +1274,144 @@
 		</div>
 		<div id="div_cugtweek" style="position:absolute; top:0px; left:0px; display:none; width:690px; background-color: rgb(255, 240, 237); border: 5px solid gray;">	</div>
 		<!---DIV分隔線---->
+		<!--暫時只顯示demo用-->
+		<div id="div_in" style="position:absolute; top:300px; left:400px; display:none; width:650px; background-color: #CDFFCE; border: 5px solid gray; z-index: 9;">
+			<table id="table_in" style="width:100%;" border="1" cellpadding='2'  cellspacing='0'>
+				<tr>
+					<td style="background-color: lightcyan;width: 105px;" align="center" >製令編號</td>
+					<td style="background-color: lightcyan;width: 295px;" colspan="3"><input id="textCubno" style="font-size: medium;width: 98%;" disabled="disabled"></td>
+					<td style="background-color: lightcyan;width: 105px;" align="center">製品編號</td>
+					<td style="background-color: lightcyan;width: 295px;" colspan="3"><input id="textProductno" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: lightcyan;" align="center" >製品名稱</td>
+					<td style="background-color: lightcyan;" colspan="7"><input id="textProduct" style="font-size: medium;width: 98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: lightcyan;" align="center">型</td>
+					<td style="background-color: lightcyan;" colspan="3"><input id="textStyle" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: lightcyan;" align="center">材質</td>
+					<td style="background-color: lightcyan;" colspan="3"><input id="textScolor" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: lightcyan;" align="center" >短徑</td>
+					<td style="background-color: lightcyan;"><input id="textRadius" style="font-size: medium;width: 98%;" disabled="disabled"></td>
+					<td style="background-color: lightcyan;width:55px;" align="center" >長徑</td>
+					<td style="background-color: lightcyan;"><input id="textWidth" style="font-size: medium;width: 98%;" disabled="disabled"></td>
+					<td style="background-color: lightcyan;" align="center" >厚度</td>
+					<td style="background-color: lightcyan;"><input id="textDime" style="font-size: medium;width: 98%;" disabled="disabled"></td>
+					<td style="background-color: lightcyan;width:55px;" align="center" >長度</td>
+					<td style="background-color: lightcyan;"><input id="textLengthb" style="font-size: medium;width: 98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: lightcyan;" align="center">預計/支</td>
+					<td style="background-color: lightcyan;" colspan="3"><input id="textMount" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: lightcyan;" align="center">產量/KG</td>
+					<td style="background-color: lightcyan;" colspan="3"><input id="textWeight" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td colspan="8" style="height: 1px;background-color:grey;" > </td>
+				</tr>
+				<tr>
+					<td style="background-color: oldlace;" align="center">目前製程</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textStation" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: oldlace;" align="center">使用機台</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textMech" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: oldlace;" align="center">製程備註1</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textMemo1" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: oldlace;" align="center">製程備註2</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textMemo2" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: oldlace;" align="center">製程備註3</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textMemo3" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: oldlace;" align="center">製程備註4</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textMemo4" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: oldlace;" align="center">製程備註5</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textMemo5" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: oldlace;" align="center">製程備註6</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textMemo6" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: oldlace;" align="center">製程備註7</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textMemo7" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: oldlace;" align="center">製程備註8</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textMemo8" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: oldlace;" align="center">本次報廢支數</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textErrmount" style="font-size: medium;width:98%;text-align: right;"></td>
+					<td style="background-color: oldlace;" align="center">本次報廢重量</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textErrweight" style="font-size: medium;width:98%;text-align: right;"></td>
+				</tr>
+				<tr>
+					<td style="background-color: oldlace;" align="center">本次維修支數</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textFixmount" style="font-size: medium;width:98%;text-align: right;"></td>
+					<td style="background-color: oldlace;" align="center">本次維修重量</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textFixweight" style="font-size: medium;width:98%;text-align: right;"></td>
+				</tr>				
+				<tr>
+					<td style="background-color: oldlace;" align="center">本次入庫數量</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textInmount" style="font-size: medium;width:98%;text-align: right;"></td>
+					<td style="background-color: oldlace;" align="center">本次入庫重量</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textInweight" style="font-size: medium;width:98%;text-align: right;"></td>
+				</tr>
+				<tr>
+					<td style="background-color: oldlace;" align="center">本次入庫把數</td>
+					<td style="background-color: oldlace;" colspan="3"><input id="textInput" style="font-size: medium;width:98%;text-align: right;"></td>
+					<td style="background-color: oldlace;" align="center">入庫人員</td>
+					<td style="background-color: oldlace;" colspan="3">
+						<input id="textWorker" style="font-size: medium;width:70%;" disabled="disabled">
+						<input id="btnOK_div_in" type="button" value="入庫" style="font-size: medium;">
+					</td>
+				</tr>
+				<tr>
+					<td style="background-color: #ffddff;" align="center">本次退件支數</td>
+					<td style="background-color: #ffddff;" colspan="3"><input id="textBmount" style="font-size: medium;width:98%;text-align: right;"></td>
+					<td style="background-color: #ffddff;" align="center">本次退件重量</td>
+					<td style="background-color: #ffddff;" colspan="3"><input id="textBweight" style="font-size: medium;width:98%;text-align: right;"></td>
+				</tr>
+				<tr>
+					<td style="background-color: #ffddff;" align="center">退件原因</td>
+					<td style="background-color: #ffddff;" colspan="7">
+						<input id="textBmemo" style="font-size: medium;width:88%;">
+						<input id="btnOK2_div_in" type="button" value="退件" style="font-size: medium;">
+					</td>
+				</tr>
+				<tr>
+					<td colspan="8" style="height: 1px;background-color:grey;" > </td>
+				</tr>
+				<tr>
+					<td style="background-color: #ffffaa;" align="center">上工段製程</td>
+					<td style="background-color: #ffffaa;" colspan="3"><input id="textPrestation" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: #ffffaa;" align="center">上工段機台</td>
+					<td style="background-color: #ffffaa;" colspan="3"><input id="textPremech" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: #ffffaa;" align="center">已入庫數量</td>
+					<td style="background-color: #ffffaa;" colspan="3"><input id="textPreinmount" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: #ffffaa;" align="center">已入庫重量</td>
+					<td style="background-color: #ffffaa;" colspan="3"><input id="textPreinweight" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td style="background-color: #ffffaa;" align="center">已入庫把數</td>
+					<td style="background-color: #ffffaa;" colspan="3"><input id="textPreinput" style="font-size: medium;width:98%;" disabled="disabled"></td>
+					<td style="background-color: #ffffaa;" align="center">上工段人員</td>
+					<td style="background-color: #ffffaa;" colspan="3"><input id="textPreworker" style="font-size: medium;width:98%;" disabled="disabled"></td>
+				</tr>
+				<tr>
+					<td colspan="8" style="height: 1px;background-color:grey;" > </td>
+				</tr>
+				<tr id="table_in_bottom">
+					<td colspan="8" style="text-align: center;"><input id="btnClose_div_in" type="button" value="關閉視窗" style="font-size: medium;"></td>
+				</tr>
+			</table>
+		</div>
+		<!---DIV分隔線---->
 		<!--#include file="../inc/toolbar.inc"-->
 		<div id='dmain' style="overflow:hidden;width: 1260px;">
 			<div class="dview" id="dview" >
@@ -1203,9 +1434,9 @@
 				<table class="tbbm" id="tbbm">
 					<tr style="height:1px;">
 						<td style="width: 95px;"> </td>
-						<td> </td>
+						<td style="width: 210px;"> </td>
 						<td style="width: 95px;"> </td>
-						<td> </td>
+						<td style="width: 210px;"> </td>
 						<td style="width: 95px;"> </td>
 						<td> </td>
 						<td class="tdZ"> </td>
@@ -1245,11 +1476,18 @@
 						</td>
 					</tr>
 					<tr>
+						<td><span> </span><a id="lblM7_na" class="lbl">型</a></td>
+						<td>
+							<input id="txtM7" type="text" class="txt c1" style="width:40%;"/>
+							<input id="txtM8" type="text" class="txt c1" style="width:55%;"/>
+						</td>
 						<td><span> </span><a id="lblM1_na" class="lbl">成品材質</a></td>
 						<td>
 							<input id="txtM1" type="text" class="txt c1" style="width:40%;"/>
 							<input id="txtM2" type="text" class="txt c1" style="width:55%;"/>
 						</td>
+					</tr>
+					<tr>
 						<td><span> </span><a id="lblM3_na" class="lbl" >短徑</a></td>
 						<td><input id="txtM3" type="text" class="txt c1 num" style="width:35%;"/>
 							<span style="float: left;margin-left: 15px;"> </span>
@@ -1306,7 +1544,6 @@
 						<td><input id="txtWorker" type="text" class="txt c1"/></td>
 						<td><span> </span><a id="lblWorker2" class="lbl" > </a></td>
 						<td><input id="txtWorker2" type="text" class="txt c1"/></td>
-						<td> </td>
 						<td colspan="2">
 							<input id="chkIsproj" type="checkbox"/>
 							<span> </span><a id='lblIsproj'>專案</a>
@@ -1341,7 +1578,7 @@
 					<td style="width:50px;"><a id='lblWeight_na_s'>完工<BR>重量</a></td>
 					<td style="width:50px;"><a id='lblWmount_na_s'>完工<BR>把數</a></td>
 					<td style="width:50px;"><a id='lblEnda_na_s'>完工</a></td>
-					
+					<td style="width:50px;"><a id='lblIn_na_s'>入庫</a></td>
 					<!--
 					<td style="width:140px;"><a id='lblTgg_na_s'>廠商簡稱</a></td>
 					<td style="width:80px;"><a id='lblMount_na_s'>請款數量</a></td>
@@ -1390,7 +1627,7 @@
 					<td><input id="txtWeight.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtWmount.*" type="text" class="txt num c1"/></td>
 					<td><input id="chkEnda.*" type="checkbox" class="txt c1"/></td>
-					
+					<td><input class="btn" id="btnIn.*" type="button" value='.' style=" font-weight: bold;" /></td>
 					<!--
 					<td>
 						<input id="txtTggno.*" type="text" class="txt c1" style="width: 80%;"/>
@@ -1417,6 +1654,7 @@
 					<td style="width:20px;"><input id="btnPlut" type="button" style="font-size: medium; font-weight: bold;" value="＋"/></td>
 					<td style="width:20px;"> </td>
 					<td style="width:140px; text-align: center;"><a id="lblUno_na">批號</a></td>
+					<td style="width:60px; text-align: center;"><a id="lblStyle_na">型</a></td>
 					<td style="width:150px; text-align: center;"><a id="lblProductno_na">素材材質</a></td>
 					<td style="width:60px; text-align: center;"><a id="lblRadius_na">短徑</a></td>
 					<td style="width:60px; text-align: center;"><a id="lblWidth_na">長徑</a></td>
@@ -1435,6 +1673,10 @@
 					</td>
 					<td><a id="lblNo..*" style="font-weight: bold;text-align: center;display: block;"> </a></td>
 					<td><input id="txtUno..*" type="text" class="txt c1"/></td>
+					<td>
+						<input id="txtStyle..*" type="text" class="txt c1" style="width: 60%;"/>
+						<input class="btn" id="btnStyle..*" type="button" value='.' style=" font-weight: bold;" />
+					</td>
 					<td>
 						<input id="txtProductno..*" type="text" class="txt c1" style="width: 30%;"/>
 						<input class="btn" id="btnProductno..*" type="button" value='.' style=" font-weight: bold;" />

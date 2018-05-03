@@ -35,12 +35,12 @@
 			brwCount2 = 11;
 			
 			aPop = new Array(
-				['txtProductno_', 'btnProduct_', 'uca', 'noa,product,bdate,size,groupeno,groupfno,groupgno,grouphno', 'txtProductno_,txtProduct_,txtUcolor_,txtScolor_,txtRadius_,txtWidth_,txtDime_,txtLengthb_', 'uca_b.aspx'],
+				['txtProductno_', 'btnProduct_', 'uca', 'noa,product,style,bdate,size,groupeno,groupfno,groupgno,grouphno', 'txtProductno_,txtProduct_,txtStyle_,txtUcolor_,txtScolor_,txtRadius_,txtWidth_,txtDime_,txtLengthb_', 'uca_b.aspx'],
 				['txtUcolor_', 'btnProduct2_', 'ucc', 'noa,product', 'txtUcolor_,txtScolor_', 'ucc_b.aspx'],
 				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
 				['txtCustno', 'lblCust', 'cust', 'noa,nick,paytype,trantype,tel,fax,zip_comp,addr_fact', 'txtCustno,txtComp,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx'],
-				['ordb_txtTggno_', '', 'tgg', 'noa,comp', 'ordb_txtTggno_,ordb_txtTgg_', '']
+				['txtStyle_', 'btnStyle_', 'style', 'noa,product', 'txtStyle_,txtProduct_', 'style_b.aspx']
 			);
 			
 			$(document).ready(function() {
@@ -312,60 +312,6 @@
 						if(abbm[q_recno])
 							$('#cmbCoin').val(abbm[q_recno].coin);
 						
-						break;
-					case 'orde_ordb':
-						var as = _q_appendData("view_orde", "", true);
-						var rowslength=document.getElementById("table_ordb").rows.length-1;
-						for (var j = 1; j < rowslength; j++) {
-							document.getElementById("table_ordb").deleteRow(1);
-						}
-							
-						for (var i = 0; i < as.length; i++) {
-							var tr = document.createElement("tr");
-							tr.id = "bbs_"+i;
-							tr.innerHTML= "<td id='ordb_tdNo2_"+i+"'><input id='ordb_txtNo2_"+i+"' type='text' value='"+as[i].no2+"' style='width: 45px' disabled='disabled' /><input id='ordb_txtNoa_"+i+"' type='text' value='"+as[i].noa+"' style='width: 45px;display:none' disabled='disabled' /></td>";
-							tr.innerHTML+="<td id='ordb_tdProdcut_"+i+"'><input id='ordb_txtProdcut_"+i+"' type='text' value='"+as[i].product+"' style='width: 200px' disabled='disabled' /></td>";
-							tr.innerHTML+="<td id='ordb_tdMount_"+i+"'><input id='ordb_txtMount_"+i+"' type='text' value='"+as[i].mount+"' style='width: 80px;text-align: right;' disabled='disabled' /></td>";
-							tr.innerHTML+="<td id='ordb_tdSafemount_"+i+"'><input id='ordb_txtSafemount_"+i+"' type='text' value='"+dec(as[i].safemount)+"' style='width: 80px;text-align: right;' disabled='disabled' /></td>";
-							tr.innerHTML+="<td id='ordb_tdStmount_"+i+"'><input id='ordb_txtStmount_"+i+"' type='text' value='"+as[i].stmount+"' style='width: 80px;text-align: right;' disabled='disabled' /></td>";
-							tr.innerHTML+="<td id='ordb_tdOcmount_"+i+"'><input id='ordb_txtOcmount_"+i+"' type='text' value='"+dec(as[i].ocmount)+"' style='width: 80px;text-align: right;' disabled='disabled' /></td>";
-							//庫存-訂單數量>安全量?不需請購:abs(安全量-(庫存-訂單數量))
-							tr.innerHTML+="<td id='ordb_tdObmount_"+i+"'><input id='ordb_txtObmount_"+i+"' type='text' value='"+(q_sub(dec(as[i].stmount),dec(as[i].mount))>as[i].safemount?0:Math.abs(q_sub(dec(as[i].safemount),q_sub(dec(as[i].stmount),dec(as[i].mount)))))+"' class='num' style='width: 80px;text-align: right;' /></td>";
-							tr.innerHTML+="<td id='ordb_tdTggno_"+i+"'><input id='ordb_txtTggno_"+i+"' type='text' value='"+as[i].tggno+"' style='width: 150px'  /><input id='ordb_txtTgg_"+i+"' type='text' value='"+as[i].tgg+"' style='width: 200px' disabled='disabled' /></td>";
-							tr.innerHTML+="<td id='ordb_tdInprice_"+i+"'><input id='ordb_txtInprice_"+i+"' type='text' value='"+(dec(as[i].tggprice)>0?as[i].tggprice:as[i].inprice)+"' class='num' style='width: 80px;text-align: right;' /></td>";
-								
-							var tmp = document.getElementById("ordb_close");
-							tmp.parentNode.insertBefore(tr,tmp);
-						}
-						$('#lblOrde2ordb').text(q_getMsg('lblOrde2ordb'));
-						$('#div_ordb').show();
-						
-						var SeekF= new Array();
-						$('#table_ordb td').children("input:text").each(function() {
-							if($(this).attr('disabled')!='disabled')
-								SeekF.push($(this).attr('id'));
-						});
-						
-						SeekF.push('btn_div_ordb');
-						$('#table_ordb td').children("input:text").each(function() {
-							$(this).keydown(function(event) {
-								if( event.which == 13) {
-									$('#'+SeekF[SeekF.indexOf($(this).attr('id'))+1]).focus();
-									$('#'+SeekF[SeekF.indexOf($(this).attr('id'))+1]).select();
-								}
-							});
-						});
-						
-						$('#table_ordb td .num').each(function() {
-							$(this).keyup(function() {
-								var tmp=$(this).val();
-								tmp=tmp.match(/\d{1,}\.{0,1}\d{0,}/);
-								$(this).val(tmp);
-							});
-						});
-						
-						refresh(q_recno);
-						q_cur=2;
 						break;
 					case 'msg_ucc':
 						var as = _q_appendData("ucc", "", true);
@@ -675,6 +621,24 @@
 							t_where = "title='本期訂單' and bdate='"+q_cdn(q_date(),-61)+"' and edate='"+q_cdn(q_date(),+61)+"' and noa='"+$('#txtProductno_' + b_seq).val()+"' and product='"+$('#txtProduct_' + b_seq).val()+"' ";
 							q_box("z_workgorde.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'scheduled', "95%", "95%", q_getMsg('PopScheduled'));
 						});
+						
+						$('#btnCub_'+i).unbind('click');
+						$('#btnCub_'+i).click(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							if (!emp($('#txtNoa').val()) && !emp($('#txtNo2_' + b_seq).val())) {
+								var t_where = "where=^^ ordeno='" + $('#txtNoa').val() + "' and no2='"+$('#txtNo2_' + b_seq).val()+"' ^^ stop=1";
+								q_gt('view_cub', t_where, 0, 0, 0, "getcub", r_accy,1);
+								var as = _q_appendData("view_cub", "", true);
+								if (as[0] != undefined) {
+									t_where = "ordeno='" + $('#txtNoa').val() + "' and no2='"+$('#txtNo2_' + b_seq).val()+"'";
+									q_box("cub_na.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'cub_na', "95%", "95%", '連續製令單');
+								}else{
+									alert('該品項未進行製令生產!!');
+								}
+							}
+						});
 					}
 				}
 				_bbsAssign();
@@ -737,7 +701,7 @@
 			}
 
 			function bbsSave(as) {
-				if (!as['productno'] && !as['product'] && !as['spec'] && !dec(as['total'])) {
+				if (!as['productno'] && !as['product'] && !as['style'] && !as['spec'] && !dec(as['total'])) {
 					as[bbsKey[1]] = '';
 					return;
 				}
@@ -989,28 +953,6 @@
 	</head>
 	<body>
 		<!--#include file="../inc/toolbar.inc"-->
-		<div id="div_ordb" style="position:absolute; top:180px; left:20px; display:none; width:1020px; background-color: #CDFFCE; border: 5px solid gray;">
-			<table id="table_ordb" style="width:100%;" border="1" cellpadding='2' cellspacing='0'>
-				<tr>
-					<td style="width:45px;background-color: #f8d463;" align="center">訂序</td>
-					<td style="width:200px;background-color: #f8d463;" align="center">品名</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">訂單數量</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">安全庫存</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">庫存數量</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">在途數量</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">採購數量</td>
-					<td style="width:200px;background-color: #f8d463;" align="center">供應商</td>
-					<td style="width:80px;background-color: #f8d463;" align="center">進貨單價</td>
-				</tr>
-				<tr id='ordb_close'>
-					<td align="center" colspan='9'>
-						<input id="btnClose_div_ordb" type="button" value="確定">
-						<input id="btnClose_div_ordb2" type="button" value="取消">
-					</td>
-				</tr>
-			</table>
-		</div>
-		
 		<div id="div_addr2" style="position:absolute; top:244px; left:500px; display:none; width:530px; background-color: #CDFFCE; border: 5px solid gray;">
 			<table id="table_addr2" style="width:100%;" border="1" cellpadding='2' cellspacing='0'>
 				<tr>
@@ -1174,7 +1116,8 @@
 						<input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" />
 					</td>
 					<td align="center" style="width:160px;"><a id='lblProductno_na_s'>品號</a></td>
-					<td align="center" style="width:200px;"><a id='lblProduct_na_s'>品名</a></td>
+					<td align="center" style="width:85px;"><a id='lblStyle_na_s'>型</a></td>
+					<td align="center" style="width:200px;"><a id='lblProduct_na_s'>品名/規格</a></td>
 					<td align="center" style="width:125px;"><a id='lblUcolor_s'>材質</a></td>
 					<td align="center" style="width:85px;"><a id='lblRadius_na_s'>短徑</a></td>
 					<td align="center" style="width:85px;"><a id='lblWidth_na_s'>長徑</a></td>
@@ -1190,6 +1133,7 @@
 					<td align="center" style="width:90px;"><a id='lblDateas'> </a></td>
 					<td align="center" style="width:43px;"><a id='lblEndas'> </a></td>
 					<td align="center" style="width:43px;"><a id='lblCancels'> </a></td>
+					<td align="center" style="width:43px;"><a id='lblCub_na_s'>製令</a></td>
 					<!--
 						<td align="center" style="width:43px;"><a id='lblBorn'> </a></td>
 						<td align="center" style="width:43px;"><a id='lblNeed'> </a></td>
@@ -1207,7 +1151,14 @@
 						<input class="btn" id="btnProduct.*" type="button" value='.' style=" font-weight: bold;" />
 						<input class="txt c6" id="txtNo2.*" type="text" />
 					</td>
-					<td><input class="txt c7" id="txtProduct.*" type="text" /></td>
+					<td>
+						<input class="txt c7" id="txtStyle.*" type="text" style="width: 70%;" />
+						<input id="btnStyle.*" type="button" style="width:1%;text-align:center;" value="."/>
+					</td>
+					<td>
+						<input class="txt c7" id="txtProduct.*" type="text" />
+						<input class="txt c7" id="txtSpec.*" type="text" />
+					</td>
 					<td>
 						<input class="txt c7" id="txtUcolor.*" type="text" style="width: 70%;"/>
 						<input class="btn" id="btnProduct2.*" type="button" value='.' style=" font-weight: bold;" />
@@ -1235,6 +1186,7 @@
 					<td><input class="txt c7" id="txtDatea.*" type="text" /></td>
 					<td align="center"><input id="chkEnda.*" type="checkbox"/></td>
 					<td align="center"><input id="chkCancel.*" type="checkbox"/></td>
+					<td align="center"><input class="btn" id="btnCub.*" type="button" value='.' style=" font-weight: bold;" /></td>
 					<!--
 					<td align="center"><input class="btn" id="btnBorn.*" type="button" value='.' style=" font-weight: bold;" /></td>
 					<td align="center"><input class="btn" id="btnNeed.*" type="button" value='.' style=" font-weight: bold;" /></td>

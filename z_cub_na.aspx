@@ -81,6 +81,12 @@
 						value : ('1@僅顯示差異>+-0.5').split(',')
 					},{
 						type : '6', //[16]
+						name : 'xordeno'
+					},{
+						type : '6', //[17]
+						name : 'xno2'
+					},{
+						type : '6', //[18]
 						name : 'xenddate'
 					}]
 				});
@@ -169,6 +175,9 @@
 					var t_xshowover=$('#chkXshowover input[type="checkbox"]').prop('checked')?encodeURI('1'):'#non';
 					var t_xshownowork=$('#chkXshownowork input[type="checkbox"]').prop('checked')?encodeURI('1'):'#non';
 					var t_xshowdiff=$('#chkXshowdiff input[type="checkbox"]').prop('checked')?encodeURI('1'):'#non';
+					
+					var t_xordeno=emp($('#txtXordeno').val())?'#non':encodeURI($('#txtXordeno').val());
+					var t_xno2=emp($('#txtXno2').val())?'#non':encodeURI($('#txtXno2').val());
 					var t_xenddate=emp($('#txtXenddate').val())?'#non':encodeURI($('#txtXenddate').val());
 					
 					Lock();
@@ -188,6 +197,8 @@
 							t_xshowover + ';'+
 							t_xshownowork + ';'+
 							t_xshowdiff + ';'+
+							t_xordeno + ';'+
+							t_xno2 + ';'+
 							t_xenddate
 					);
 					
@@ -420,6 +431,8 @@
 									TL.push({
 										processno : as[i].processno,
 										process : as[i].process,
+										custno : as[i].custno,
+										comp : as[i].comp,
 										productno : as[i].productno,
 										product : as[i].product,
 										gen : as[i].gen,
@@ -451,8 +464,9 @@
 							}
 							OutHtml += '<tr>';
 							OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>" +
-									   "<td class='tTitle' style='width:210px;' colspan='2' rowspan='2'>製程</td>" +
-									   "<td class='tTitle' style='width:100px;' rowspan='2'>需工時</td>";
+										"<td class='tTitle' style='width:100px;' rowspan='2'>客戶</td>" +
+										"<td class='tTitle' style='width:210px;' colspan='2' rowspan='2'>製程</td>" +
+										"<td class='tTitle' style='width:100px;' rowspan='2'>需工時</td>";
 									   
 							t_xshownowork='';//目前不使用
 							if(t_xshownowork=='1')
@@ -515,8 +529,9 @@
 								if(rowline/20>1){
 									OutHtml += '<tr>';
 									OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>" +
-											   "<td class='tTitle' style='width:210px;' colspan='2' rowspan='2'>製程</td>" +
-											   "<td class='tTitle' style='width:100px;' rowspan='2'>需工時</td>";
+												"<td class='tTitle' style='width:100px;' rowspan='2'>客戶</td>" +
+												"<td class='tTitle' style='width:210px;' colspan='2' rowspan='2'>製程</td>" +
+												"<td class='tTitle' style='width:100px;' rowspan='2'>需工時</td>";
 									if(t_xshownowork=='1')
 										OutHtml += "<td class='tTitle' style='width:100px;' rowspan='2'> </td>";
 									
@@ -541,8 +556,9 @@
 								
 								OutHtml += '<tr>';
 								OutHtml += "<td class='Lproduct' style='width:150px;'>" + TL[k].productno + "</td><td class='Lproduct' style='width:220px;'>" + TL[k].product + "</td>" +
-										   "<td class='Lproduct' style='width:120px;'>" + TL[k].processno + "</td><td class='Lproduct' style='width:120px;'>" + TL[k].process + "</td>" +
-										   "<td class='num'>" + TL[k].gen + "</td>";
+											"<td class='Lproduct'>" + TL[k].comp + "</td>"+
+											"<td class='Lproduct' style='width:120px;'>" + TL[k].processno + "</td><td class='Lproduct' style='width:120px;'>" + TL[k].process + "</td>" +
+											"<td class='num'>" + TL[k].gen + "</td>";
 								if(t_xshownowork=='1')
 									OutHtml += "<td class='num'>製造數量<br><a style='color:red;'>未完工數</a></td>";
 									
@@ -627,7 +643,7 @@
 								}
 							}
 							
-							OutHtml += "<tr><td colspan='5' class='tTotal num'>總計：</td>";
+							OutHtml += "<tr><td colspan='6' class='tTotal num'>總計：</td>";
 							if(t_xshownowork=='1')
 								OutHtml += "<td class='tTotal num'>製造數量<br><a style='color:red;'>未完工數</a></td>"
 							for(var k=0;k<DateObj.length;k++){
@@ -694,6 +710,8 @@
 									TL.push({
 										productno : as[i].productno,
 										product : as[i].product,
+										custno : as[i].custno,
+										comp : as[i].comp,
 										datea : []
 									});
 								}
@@ -722,6 +740,7 @@
 							}
 							OutHtml += '<tr>';
 							OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>";
+							OutHtml += "<td class='tTitle' style='width:100px;' rowspan='2'>客戶</td>";
 							OutHtml += "<td class='tTitle' style='width:80px;' rowspan='2'></td>";
 							var tmpTd = '<tr>';
 							for(var j=0;j<DateList.length;j++){
@@ -737,6 +756,7 @@
 							for(var k=0;k<TL.length;k++){
 								OutHtml += '<tr>';
 								OutHtml += "<td class='Lproduct' style='width:150px;' rowspan='2'>" + TL[k].productno + "</td><td class='Lproduct' style='width:220px;' rowspan='2'>" + TL[k].product + "</td>";
+								OutHtml += "<td class='Lproduct' rowspan='2'>" + TL[k].comp + "</td>";
 								var TTD = TL[k].datea;
 								var tTotal = 0;
 								var wTotal = 0;
@@ -763,6 +783,7 @@
 								if(k%20==0 && k!=0){
 									OutHtml += '<tr>';
 									OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>";
+									OutHtml += "<td class='tTitle' style='width:100px;' rowspan='2'>客戶</td>";
 									OutHtml += "<td class='tTitle' style='width:80px;' rowspan='2'></td>";
 									var tmpTd = '<tr>';
 									for(var j=0;j<DateList.length;j++){
@@ -777,7 +798,7 @@
 								}
 
 							}
-							OutHtml += "<tr><td colspan='2' rowspan='2' class='tTotal num'>總計：</td>";
+							OutHtml += "<tr><td colspan='3' rowspan='2' class='tTotal num'>總計：</td>";
 							OutHtml += "<td class='center tTotal' style='width:80px;'>訂單數量</td>";
 							for(var k=0;k<DateObj.length;k++){
 								OutHtml += "<td class='tTotal num'>" + (round(DateObj[k].value,0)==0 && DateObj[k].value>0?round(DateObj[k].value,2):Zerospaec(round(DateObj[k].value,0))) + "</td>";
@@ -837,6 +858,8 @@
 									TL.push({
 										productno : as[i].productno,
 										product : as[i].product,
+										custno : as[i].custno,
+										comp : as[i].comp,
 										datea : []
 									});
 								}
@@ -865,6 +888,7 @@
 							}
 							OutHtml += '<tr>';
 							OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>";
+							OutHtml += "<td class='tTitle' style='width:100px;' rowspan='2'>客戶</td>";
 							var tmpTd = '<tr>';
 							for(var j=0;j<DateList.length;j++){
 								var thisDay = DateList[j];
@@ -879,6 +903,7 @@
 							for(var k=0;k<TL.length;k++){
 								OutHtml += '<tr>';
 								OutHtml += "<td class='Lproduct' style='width:150px;'>" + TL[k].productno + "</td><td class='Lproduct' style='width:220px;'>" + TL[k].product + "</td>";
+								OutHtml += "<td class='Lproduct'>" + TL[k].comp + "</td>";
 								var TTD = TL[k].datea;
 								var tTotal = 0;
 								for(var j=0;j<TTD.length;j++){
@@ -893,6 +918,7 @@
 								if(k%20==0 && k!=0){
 									OutHtml += '<tr>';
 									OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>";
+									OutHtml += "<td class='tTitle' style='width:100px;' rowspan='2'>客戶</td>";
 									var tmpTd = '<tr>';
 									for(var j=0;j<DateList.length;j++){
 										var thisDay = DateList[j];
@@ -905,7 +931,7 @@
 									OutHtml += '</tr>' + tmpTd;
 								}
 							}
-							OutHtml += "<tr><td colspan='2' class='tTotal num'>總計：</td>";
+							OutHtml += "<tr><td colspan='3' class='tTotal num'>總計：</td>";
 							for(var k=0;k<DateObj.length;k++){
 								OutHtml += "<td class='tTotal num'>" + (round(DateObj[k].value,0)==0 && DateObj[k].value>0?round(DateObj[k].value,2):Zerospaec(round(DateObj[k].value,0))) + "</td>";
 							}
