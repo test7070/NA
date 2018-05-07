@@ -338,8 +338,9 @@
 								if(dec($('#textNeed11_'+i).val())>0){tcut++;}
 								if(dec($('#textNeed12_'+i).val())>0){tcut++;}
 								if(dec($('#textNeed13_'+i).val())>0){tcut++;}
-								if(tcut>1){
-									t_mount=q_mul(t_mount,tcut);
+								if(tcut>1){ //107/05/07 暫定 先*2
+									//t_mount=q_mul(t_mount,tcut);
+									t_mount=q_mul(t_mount,2);
 								}
 							}
 							if(t_procno.toUpperCase()=='D'){//抽管 變動 長度
@@ -1398,7 +1399,7 @@
 					<td style="background-color: oldlace;" align="center">入庫人員</td>
 					<td style="background-color: oldlace;" colspan="3">
 						<input id="textWorker" style="font-size: medium;width:70%;" disabled="disabled">
-						<input id="btnOK_div_in" type="button" value="入庫" style="font-size: medium;">
+						<input id="btnOK_div_in" type="button" value="入庫" style="font-size: medium;font-weight: bold;color: blue;">
 					</td>
 				</tr>
 				<tr>
@@ -1411,7 +1412,7 @@
 					<td style="background-color: #ffddff;" align="center">退件原因</td>
 					<td style="background-color: #ffddff;" colspan="7">
 						<input id="textBmemo" style="font-size: medium;width:88%;">
-						<input id="btnOK2_div_in" type="button" value="退件" style="font-size: medium;">
+						<input id="btnOK2_div_in" type="button" value="退件" style="font-size: medium;font-weight: bold;color: red;">
 					</td>
 				</tr>
 				<tr>
@@ -1613,10 +1614,10 @@
 					<td style="width:60px;"><a id='lblNeed12_na_s'>製程備註<BR>12</a></td>
 					<td style="width:60px;"><a id='lblNeed13_na_s'>製程備註<BR>13</a></td>
 					<td style="width:150px;"><a id='lblProductno2_na_s'>機台</a></td>
-					<td style="width:60px;"><a id='lblX01_na_s'>處理支數</a></td>
-					<td style="width:60px;"><a id='lblX02_na_s'>處理重量</a></td>
-					<td style="width:60px;;"><a id='lblX03_na_s'>處理MM</a></td>
-					<td style="width:60px;"><a id='lblX04_na_s'>處理把數</a></td>
+					<td style="width:60px;"><a id='lblX01_na_s'>預計入庫支數</a></td>
+					<td style="width:60px;display: none;"><a id='lblX02_na_s'>預計入庫重量</a></td>
+					<td style="width:60px;"><a id='lblX03_na_s'>預計入庫MM</a></td>
+					<td style="width:60px;display: none;"><a id='lblX04_na_s'>預計入庫把數</a></td>
 					<td style="width:50px;"><a id='lblHmount_na_s'>工時</a></td>
 					<td style="width:90px;"><a id='lblDate2_na_s'>指定開工日</a></td>
 					<td style="width:50px;"><a id='lblMount_na_s'>完工<BR>支數</a></td>
@@ -1672,9 +1673,9 @@
 						<input id="txtProduct2.*" type="text" class="txt c1" style="width: 55%;"/>
 					</td>
 					<td><input id="txtX01.*" type="text" class="txt num c1"/></td>
-					<td><input id="txtX02.*" type="text" class="txt num c1"/></td>
+					<td style="display: none;"><input id="txtX02.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtX03.*" type="text" class="txt num c1"/></td>
-					<td><input id="txtX04.*" type="text" class="txt num c1"/></td>
+					<td style="display: none;"><input id="txtX04.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtHmount.*" type="text" class="txt num c1"/></td>
 					<td><input id="txtDate2.*" type="text" class="txt c1"/></td>
 					<td><input id="txtMount.*" type="text" class="txt num c1"/></td>

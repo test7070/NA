@@ -129,7 +129,7 @@ select '99',b.processno,b.process,a.custno,a.comp,a.productno,a.product,b.date2
 ,d.dayno
 ,case when d.dayno='支' then b.x01 when d.dayno='把' then b.x04 when UPPER(d.dayno)='KG' then b.x02  else b.x03 end
 ,b.hmount
-,case when isnull(b.x01,0)-isnull(b.mount,0)<0 then 0 else isnull(b.x01,0)-isnull(b.mount,0) end
+,case when d.dayno='支' then b.x01-b.mount when d.dayno='把' then b.x04-b.wmount when UPPER(d.dayno)='KG' then b.x02-b.weight else b.x03-case when b.x01=0 then 0 else ((b.x03/b.x01)*b.mount) end end
 from view_cub a left join view_cubs b on a.noa=b.noa
 left join station c on c.noa=b.processno
 left join stations d on d.noa=b.processno and d.mechno=b.productno2

@@ -52,7 +52,7 @@
 				q_gt('acomp', "where=^^(dbname='"+t_db+"' or not exists (select * from acomp where dbname='"+t_db+"')) ^^ stop=1", 0, 0, 0, "cno_acomp");
 				q_gt('flors_coin', '', 0, 0, 0, "flors_coin");
 				$('#txtOdate').focus();
-				
+				q_gt('style', '', 0, 0, 0, '');
 			});
 
 			function main() {
@@ -313,6 +313,11 @@
 							$('#cmbCoin').val(abbm[q_recno].coin);
 						
 						break;
+					case 'style' :
+                        var as = _q_appendData("style", "", true);
+                        StyleList = new Array();
+                        StyleList = as;
+                        break;
 					case 'msg_ucc':
 						var as = _q_appendData("ucc", "", true);
 						t_msg = '';
@@ -439,6 +444,7 @@
 						}
 						break;
 					case q_name:
+						t_uccArray = _q_appendData("ucc", "", true);
 						if (q_cur == 4)
 							q_Seek_gtPost();
 						break;
@@ -550,6 +556,10 @@
 							sum();
 						});
 						$('#txtMount_' + j).focusout(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							getTheory(b_seq);
 							sum();
 						});
 						$('#txtTotal_' + j).focusout(function() {
@@ -638,6 +648,44 @@
 									alert('該品項未進行製令生產!!');
 								}
 							}
+						});
+						
+						
+						$('#txtRadius_'+i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							getTheory(b_seq);
+						});
+						$('#txtWidth_'+i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							getTheory(b_seq);
+						});
+						$('#txtDime_'+i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							getTheory(b_seq);
+						});
+						$('#txtLengthb_'+i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+							getTheory(b_seq);
+						});
+						
+						$('#txtStyle_'+i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
+						});
+						
+						$('#txtUcolor_'+i).change(function() {
+							t_IdSeq = -1;
+							q_bodyId($(this).attr('id'));
+							b_seq = t_IdSeq;
 						});
 					}
 				}
@@ -834,8 +882,42 @@
 							q_gt('custaddr', t_where, 0, 0, 0, "");
 						}
 						break;
+					case 'txtStyle_':
+						getTheory(b_seq);
+						break;
+					case 'txtUcolor_':
+						getTheory(b_seq);
+						break;
 				}
 			}
+			
+			var StyleList = '';
+            var t_uccArray = new Array;
+			function getTheory(b_seq) {
+                t_Radius = dec($('#txtRadius_' + b_seq).val());
+                t_Width = dec($('#txtWidth_' + b_seq).val());
+                t_Dime = dec($('#txtDime_' + b_seq).val());
+                t_Lengthb = dec($('#txtLengthb_' + b_seq).val());
+                t_Mount = dec($('#txtMount_' + b_seq).val());
+                t_Style = $('#txtStyle_' + b_seq).val();
+                t_Stype = ($('#cmbStype').find("option:selected").text() == '外銷' ? 1 : 0);
+                t_Productno = $('#txtUcolor_' + b_seq).val();
+                var theory_setting={
+                    calc:StyleList,
+                    ucc:t_uccArray,
+                    radius:t_Radius,
+                    width:t_Width,
+                    dime:t_Dime,
+                    lengthb:t_Lengthb,
+                    mount:t_Mount,
+                    style:t_Style,
+                    stype:t_Stype,
+                    productno:t_Productno,
+                    round:1
+                };
+                
+                q_tr('txtWeight_' + b_seq, theory_st(theory_setting));
+            }
 			
 		</script>
 		<style type="text/css">

@@ -469,7 +469,7 @@
 										"<td class='tTitle' style='width:210px;' colspan='2' rowspan='2'>製程</td>" +
 										"<td class='tTitle' style='width:100px;' rowspan='2'>標準產能</td>";
 									   
-							t_xshownowork='';//目前不使用
+							//t_xshownowork='';//目前不使用
 							if(t_xshownowork=='1')
 								OutHtml += "<td class='tTitle' style='width:100px;' rowspan='2'> </td>";
 								
@@ -502,7 +502,7 @@
 									OutHtml += "<td class='sTotal processno'>" + t_processno + "</td><td class='sTotal process'>" + t_process + "</td>" ;
 									OutHtml += "<td class='sTotal num'>小計：</td>";
 									if(t_xshownowork=='1')
-										OutHtml += "<td class='sTotal num'>製造數量<br><a style='color:red;'>未完工數</a></td>"
+										OutHtml += "<td class='sTotal num'>預計入庫數<br><a style='color:red;'>未完工數</a></td>"
 									var stotla=0,itotla=0;
 									for(var c=0;c<DateObj.length;c++){
 										if(t_xshownowork=='1')
@@ -515,7 +515,7 @@
 											itotla=q_add(itotla,round(DateObj[c].itotal,3));
 										}else{
 											if(t_xshownowork=='1')
-												OutHtml += "<td class='sTotal num'>製造數量<br><a style='color:red;'>未完工數</a></td>"
+												OutHtml += "<td class='sTotal num'>預計入庫數<br><a style='color:red;'>未完工數</a></td>"
 										}
 										DateObj[c].stotal=0;
 										DateObj[c].itotal=0;
@@ -562,7 +562,7 @@
 											"<td class='Lproduct' style='width:120px;'>" + TL[k].processno + "</td><td class='Lproduct' style='width:120px;'>" + TL[k].process + "</td>" +
 											"<td class='num'>" + TL[k].gen + "</td>";
 								if(t_xshownowork=='1')
-									OutHtml += "<td class='num'>製造數量<br><a style='color:red;'>未完工數</a></td>";
+									OutHtml += "<td class='num'>預計入庫數<br><a style='color:red;'>未完工數</a></td>";
 									
 								var TTD = TL[k].datea;
 								var tTotal = 0,itTotal = 0;
@@ -575,7 +575,7 @@
 											OutHtml += "<td class='num'>" + (round(wtotal,0)==0 && wtotal>0?round(wtotal,2):Zerospaec(round(wtotal,1))) + "</td>";
 										}
 										if(t_xshownowork=='1')
-											OutHtml += "<td class='num'>製造數量<br><a style='color:red;'>未完工數</a></td>";
+											OutHtml += "<td class='num'>預計入庫數<br><a style='color:red;'>未完工數</a></td>";
 											
 										DateObj[j].value = q_add(dec(DateObj[j].value),wtotal);
 										DateObj[j].stotal = q_add(dec(DateObj[j].stotal),wtotal);
@@ -621,7 +621,7 @@
 								OutHtml += "<td class='sTotal processno'>" + t_processno + "</td><td class='sTotal process'>" + t_process + "</td>" ;
 								OutHtml += "<td class='sTotal num'>小計：</td>";
 								if(t_xshownowork=='1')
-									OutHtml += "<td class='sTotal num'>製造數量<br><a style='color:red;'>未完工數</a></td>"
+									OutHtml += "<td class='sTotal num'>預計入庫數<br><a style='color:red;'>未完工數</a></td>"
 								var stotla=0,itotla=0;
 								for(var c=0;c<DateObj.length;c++){
 									if(t_xshownowork=='1'){
@@ -634,7 +634,7 @@
 											stotla=q_add(stotla,round(DateObj[c].stotal,3));
 									}else{
 										if(t_xshownowork=='1')
-											OutHtml += "<td class='sTotal num'>製造數量<br><a style='color:red;'>未完工數</a></td>"
+											OutHtml += "<td class='sTotal num'>預計入庫數<br><a style='color:red;'>未完工數</a></td>"
 									}
 									DateObj[c].stotal=0;
 									DateObj[c].itotal=0;
@@ -648,7 +648,7 @@
 							
 							/*OutHtml += "<tr><td colspan='6' class='tTotal num'>總計：</td>";
 							if(t_xshownowork=='1')
-								OutHtml += "<td class='tTotal num'>製造數量<br><a style='color:red;'>未完工數</a></td>"
+								OutHtml += "<td class='tTotal num'>預計入庫數<br><a style='color:red;'>未完工數</a></td>"
 							for(var k=0;k<DateObj.length;k++){
 								if(t_xshownowork=='1'){
 									OutHtml += "<td class='tTotal num'>" + (round(DateObj[k].value,0)==0 && DateObj[k].value>0?round(DateObj[k].value,2):Zerospaec(round(DateObj[k].value,1)))+"<BR><a style='color:red;'>"+(round(DateObj[k].ivalue,0)==0 && DateObj[k].ivalue>0?round(DateObj[k].ivalue,2):Zerospaec(round(DateObj[k].ivalue,1))) + "</a></td>";
@@ -657,7 +657,7 @@
 								}
 								if(DateObj[k].datea=='週小計'){
 									if(t_xshownowork=='1')
-										OutHtml += "<td class='tTotal num'>製造數量<br><a style='color:red;'>未完工數</a></td>"
+										OutHtml += "<td class='tTotal num'>預計入庫數<br><a style='color:red;'>未完工數</a></td>"
 								}
 							}
 							if(t_xshownowork=='1'){
