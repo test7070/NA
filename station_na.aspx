@@ -511,7 +511,7 @@
 					</td>
 					<td align="center" style="width:20%;"><a id='lblMechno_s'> </a></td>
 					<td align="center" style="width:25%;"><a id='lblMech_s'> </a></td>
-					<td align="center" style="width:15%;"><a id='lblGen_na_s'>產量</a></td>
+					<td align="center" style="width:15%;"><a id='lblGen_na_s'>產量/HR</a></td>
 					<td align="center" style="width:10%;"><a id='lblDayno_na_s'>單位</a></td>
 					<td align="center" ><a id='lblMemo_s'> </a></td>
 				</tr>

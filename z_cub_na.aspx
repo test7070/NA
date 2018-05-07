@@ -435,6 +435,7 @@
 										comp : as[i].comp,
 										productno : as[i].productno,
 										product : as[i].product,
+										unit : as[i].unit,
 										gen : as[i].gen,
 										datea : []
 									});
@@ -449,7 +450,7 @@
 								isFind = false;
 								for(var j=0;j<TL.length;j++){
 									if(isFind) break;
-									if((as[k].processno==TL[j].processno) && (as[k].productno==TL[j].productno)){
+									if((as[k].processno==TL[j].processno) && (as[k].productno==TL[j].productno) && (as[k].unit==TL[j].unit)){
 										var TLDatea = TL[j].datea;
 										for(var h=0;h<TLDatea.length;h++){
 											if(as[k].datea==TLDatea[h][0]){
@@ -466,7 +467,7 @@
 							OutHtml += "<td class='tTitle' style='width:370px;' colspan='2' rowspan='2'>物品</td>" +
 										"<td class='tTitle' style='width:100px;' rowspan='2'>客戶</td>" +
 										"<td class='tTitle' style='width:210px;' colspan='2' rowspan='2'>製程</td>" +
-										"<td class='tTitle' style='width:100px;' rowspan='2'>需工時</td>";
+										"<td class='tTitle' style='width:100px;' rowspan='2'>標準產能</td>";
 									   
 							t_xshownowork='';//目前不使用
 							if(t_xshownowork=='1')
@@ -492,10 +493,11 @@
 							var iATotal = 0,iwtotal=0;
 							var t_processno='#non';
 							var t_process='#non';
+							var t_unit='#non';
 							var rowline=0;
 							for(var k=0;k<TL.length;k++){
 								//插入工作線別小計
-								if(t_processno!='#non' && t_processno!=TL[k].processno && showatotal){
+								if(t_processno!='#non' && t_processno!=TL[k].processno && t_unit!=TL[k].unit && showatotal){
 									OutHtml += "<tr><td colspan='2' class='sTotal num'></td>";
 									OutHtml += "<td class='sTotal processno'>" + t_processno + "</td><td class='sTotal process'>" + t_process + "</td>" ;
 									OutHtml += "<td class='sTotal num'>小計：</td>";
@@ -555,7 +557,7 @@
 								}
 								
 								OutHtml += '<tr>';
-								OutHtml += "<td class='Lproduct' style='width:150px;'>" + TL[k].productno + "</td><td class='Lproduct' style='width:220px;'>" + TL[k].product + "</td>" +
+								OutHtml += "<td class='Lproduct' style='width:160px;'>" + TL[k].productno + "</td><td class='Lproduct' style='width:210px;'>" + TL[k].product + "</td>" +
 											"<td class='Lproduct'>" + TL[k].comp + "</td>"+
 											"<td class='Lproduct' style='width:120px;'>" + TL[k].processno + "</td><td class='Lproduct' style='width:120px;'>" + TL[k].process + "</td>" +
 											"<td class='num'>" + TL[k].gen + "</td>";
@@ -610,6 +612,7 @@
 								
 								t_processno=TL[k].processno;
 								t_process=TL[k].process;
+								t_unit=TL[k].unit;
 								rowline++;
 							}
 							//插入最後一筆工作線別小計
@@ -643,7 +646,7 @@
 								}
 							}
 							
-							OutHtml += "<tr><td colspan='6' class='tTotal num'>總計：</td>";
+							/*OutHtml += "<tr><td colspan='6' class='tTotal num'>總計：</td>";
 							if(t_xshownowork=='1')
 								OutHtml += "<td class='tTotal num'>製造數量<br><a style='color:red;'>未完工數</a></td>"
 							for(var k=0;k<DateObj.length;k++){
@@ -661,7 +664,7 @@
 								OutHtml += "<td class='tTotal num'>" + (round(ATotal,0)==0 && ATotal>0?round(ATotal,2):Zerospaec(round(ATotal,1)))+"<BR><a style='color:red;'>" +(round(iATotal,0)==0 && iATotal>0?round(iATotal,2):Zerospaec(round(iATotal,1)))+ "</a></td>";
 							}else{
 								OutHtml += "<td class='tTotal num'>" + (round(ATotal,0)==0 && ATotal>0?round(ATotal,2):Zerospaec(round(ATotal,1))) + "</td>";
-							}
+							}*/
 							OutHtml += "</table>"
 							var t_totalWidth = 0;
 							t_totalWidth = 690+((70+2)*(DateObj.length+1+2))+10;
