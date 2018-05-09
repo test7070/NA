@@ -128,6 +128,15 @@
 					}
 				});
 				
+				$('#btnCubu_na').click(function() {
+					if (q_cur == 0 || q_cur==4) {
+						if($('#txtNoa').val().length>0){
+							var t_where = "noa='" + trim($('#txtNoa').val()) + "'";
+							q_box("cubu_b_na.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where + ";"+r_accy, 'cubu', "95%", "95%", q_getMsg('popCubu'));
+						}
+					}
+				});
+				
 				$('#btnCugt2').click(function() {
 					$('#textCugtbdate').val(q_date());
 					$('#textCugtedate').val(q_cdn(q_date(),15));
@@ -604,6 +613,7 @@
 								$('#txtNo2').val(b_ret[0].no2);
 								$('#txtProductno').val(b_ret[0].productno);
 								$('#txtProduct').val(b_ret[0].product);
+								$('#txtSpec').val(b_ret[0].spec);
 								$('#txtMount').val(b_ret[0].mount);
 								$('#txtIdime').val(b_ret[0].weight);
 								$('#txtItype').val(b_ret[0].stype);
@@ -1523,6 +1533,8 @@
 							<input id="txtM1" type="text" class="txt c1" style="width:40%;"/>
 							<input id="txtM2" type="text" class="txt c1" style="width:55%;"/>
 						</td>
+						<td><span> </span><a id="lblSpec_na" class="lbl" >規格</a></td>
+						<td><input id="txtSpec" type="text" class="txt c1"/></td>
 					</tr>
 					<tr>
 						<td><span> </span><a id="lblM3_na" class="lbl" >短徑</a></td>
@@ -1545,8 +1557,9 @@
 						<td><input id="txtMount" type="text" class="txt num c1"/></td>
 						<td><span> </span><a id="lblIdime_na" class="lbl" >產量/KG</a></td>
 						<td><input id="txtIdime" type="text" class="txt num c1"/></td>
+						<td><input type="button" id="btnCubu_na" value="入庫"></td>
 					</tr>
-					<tr>
+					<tr style="display: none;">
 						<td><span> </span><a id="lblC1" class="lbl" >已交量</a></td>
 						<td><input id="txtC1" type="text" class="txt num c1"/></td>
 						<td><span> </span><a id="lblNotv" class="lbl" >未交量</a></td>
