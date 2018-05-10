@@ -31,8 +31,8 @@
 			}
 			aPop = new Array(
 				['txtStoreno_', 'btnStoreno_', 'store', 'noa,store', 'txtStoreno_,txtStore_', 'store_b.aspx'],
-				['txtProductno_', 'btnProduct_', 'uca', 'noa,product,style,bdate,size,groupeno,groupfno,groupgno,grouphno', 'txtProductno_,txtProduct_,txtStyle_,txtUcolor_,txtScolor_,txtRadius_,txtWidth_,txtDime_,txtLengthb_', 'uca_b.aspx'],
-				['txtUcolor_', 'btnProduct2_', 'ucc', 'noa,product', 'txtUcolor_,txtScolor_', 'ucc_b.aspx'],
+				['txtUcolor_', 'btnProduct_', 'uca', 'noa,style,team,bdate,size,groupeno,groupfno,groupgno,grouphno', 'txtUcolor_,txtStyle_,txtProduct_,txtProductno_,txtScolor_,txtRadius_,txtWidth_,txtDime_,txtLengthb_', 'uca_b.aspx'],
+				['txtProductno_', 'btnProduct2_', 'ucc', 'noa,product', 'txtProductno_,txtScolor_', 'ucc_b.aspx'],
 				['txtStyle_', 'btnStyle_', 'style', 'noa,product', 'txtStyle_,txtProduct_', 'style_b.aspx']
 			);
 			$(document).ready(function() {
@@ -65,11 +65,11 @@
 				
 				$('#btnCubt').click(function() {
 					if(q_cur==1 || q_cur==2){
-						var t_productno=Parent.$('#txtProductno').val();
+						var t_ucolor=Parent.$('#txtProductno').val();
 						var t_style=Parent.$('#txtM7').val();
 						var t_product=Parent.$('#txtProduct').val();
 						var t_spec=Parent.$('#txtSpec').val();
-						var t_ucolor=Parent.$('#txtM1').val();
+						var t_productno=Parent.$('#txtM1').val();
 						var t_scolor=Parent.$('#txtM2').val();
 						var t_radius=Parent.$('#txtM3').val();
 						var t_widths=Parent.$('#txtM4').val();
@@ -104,11 +104,11 @@
 										$('#txtUno_'+j).val(as[0].uno);
 									}
 								}
-								$('#txtProductno_'+j).val(t_productno);
+								$('#txtUcolor_'+j).val(t_ucolor);
 								$('#txtStyle_'+j).val(t_style);
 								$('#txtProduct_'+j).val(t_product);
 								$('#txtSpec_'+j).val(t_spec);
-								$('#txtUcolor_'+j).val(t_ucolor);
+								$('#txtProductno_'+j).val(t_productno);
 								$('#txtScolor_'+j).val(t_scolor);
 								$('#txtRadius_'+j).val(t_radius);
 								$('#txtWidth_'+j).val(t_widths);
@@ -131,7 +131,7 @@
                 t_Mount = dec($('#txtMount_' + b_seq).val());
                 t_Style = $('#txtStyle_' + b_seq).val();
                 t_Stype = ($('#cmbStype').find("option:selected").text() == '外銷' ? 1 : 0);
-                t_Productno = $('#txtUcolor_' + b_seq).val();
+                t_Productno = $('#txtProductno_' + b_seq).val();
                 var theory_setting={
                     calc:StyleList,
                     ucc:t_uccArray,
@@ -296,7 +296,7 @@
 				_refresh();
 				$('input[id*="txtProduct_"]').each(function() {
 					thisId = $(this).attr('id').split('_')[$(this).attr('id').split('_').length - 1];
-					$(this).attr('OldValue', $('#txtProductno_' + thisId).val());
+					$(this).attr('OldValue', $('#txtUcolor_' + thisId).val());
 				});
 				var UnoList = $.trim(GetBBsUno());
 				if (UnoList.length > 0) {
@@ -358,7 +358,7 @@
 
 			function q_popPost(s1) {
 				switch (s1) {
-					case 'txtProductno_':
+					case 'txtUcolor_':
 						
 						break;
 				}
@@ -435,10 +435,10 @@
 					</td>
 					<td align="center" style="width:15px;"> </td>
 					<td align="center" style="width:160px;"><a id='lblUno_na'>批號</a></td>
-					<td align="center" style="width:160px;"><a id='lblProductno_na'>品號</a></td>
+					<td align="center" style="width:160px;"><a id='lblUcolor_na'>品號</a></td>
 					<td align="center" style="width:45px;"><a id='lblStyle_na'>型</a></td>
 					<td align="center" style="width:200px;"><a id='lblProduct_na'>品名/規格</a></td>
-					<td align="center" style="width:125px;"><a id='lblUcolor_na'>材質</a></td>
+					<td align="center" style="width:125px;"><a id='lblProductno_na'>材質</a></td>
 					<td align="center" style="width:85px;"><a id='lblRadius_na'>短徑</a></td>
 					<td align="center" style="width:85px;"><a id='lblWidth_na'>長徑</a></td>
 					<td align="center" style="width:85px;"><a id='lblDime_na'>厚度</a></td>
@@ -458,14 +458,14 @@
 						<input type="hidden" id="txtSource.*"/>
 					</td>
 					<td><input type="text" id="txtUno.*" class="txt c1"/></td>
-					<td><input type="text" id="txtProductno.*" class="txt c1"/></td>
+					<td><input type="text" id="txtUcolor.*" class="txt c1"/></td>
 					<td><input type="text" id="txtStyle.*" class="txt c1" style="text-align: center;"/></td>
 					<td>
 						<input type="text" id="txtProduct.*" class="txt c1"/>
 						<input type="text" id="txtSpec.*" class="txt c1"/>
 					</td>
 					<td>
-						<input type="text" id="txtUcolor.*" class="txt c1"/>
+						<input type="text" id="txtProductno.*" class="txt c1"/>
 						<input type="text" id="txtScolor.*" class="txt c1"/>
 					</td>
 					<td><input type="text" id="txtRadius.*" class="txt num c1"/></td>

@@ -84,12 +84,12 @@
 				<tr  style='background:#cad3ff;'>
 					<td style="width:1%;" align="center"><input name="sel"  id="radSel.*" type="radio" /></td>
 					<td style="width:15%;">
-						<input class="txt" id="txtProductno.*" type="text" style="width:78%;" />
+						<input class="txt" id="txtUcolor.*" type="text" style="width:78%;" />
 						<input class="txt" id="txtStyle.*" type="text" style="width:15%;" />
 						<input class="txt" id="txtProduct.*" type="text" style="width:98%;" />
 					</td>
 					<td style="width:10%;">
-						<input class="txt" id="txtUcolor.*" type="text" style="width:98%;"/>
+						<input class="txt" id="txtProductno.*" type="text" style="width:98%;"/>
 						<input class="txt" id="txtScolor.*" type="text" style="width:98%;"/>
 					</td>
 					<td style="width:8%;">

@@ -35,8 +35,8 @@
 			brwCount2 = 11;
 			
 			aPop = new Array(
-				['txtProductno_', 'btnProduct_', 'uca', 'noa,product,style,bdate,size,groupeno,groupfno,groupgno,grouphno', 'txtProductno_,txtProduct_,txtStyle_,txtUcolor_,txtScolor_,txtRadius_,txtWidth_,txtDime_,txtLengthb_', 'uca_b.aspx'],
-				['txtUcolor_', 'btnProduct2_', 'ucc', 'noa,product', 'txtUcolor_,txtScolor_', 'ucc_b.aspx'],
+				['txtUcolor_', 'btnUcolor_', 'uca', 'noa,style,team,bdate,size,groupeno,groupfno,groupgno,grouphno', 'txtUcolor_,txtStyle_,txtProduct_,txtProductno_,txtScolor_,txtRadius_,txtWidth_,txtDime_,txtLengthb_', 'uca_b.aspx'],
+				['txtProductno_', 'btnProduct2_', 'ucc', 'noa,product', 'txtProductno_,txtScolor_', 'ucc_b.aspx'],
 				['txtSalesno', 'lblSales', 'sss', 'noa,namea', 'txtSalesno,txtSales', 'sss_b.aspx'],
 				['txtCno', 'lblAcomp', 'acomp', 'noa,acomp', 'txtCno,txtAcomp', 'acomp_b.aspx'],
 				['txtCustno', 'lblCust', 'cust', 'noa,nick,paytype,trantype,tel,fax,zip_comp,addr_fact', 'txtCustno,txtComp,txtPaytype,cmbTrantype,txtTel,txtFax,txtPost,txtAddr', 'cust_b.aspx'],
@@ -252,7 +252,7 @@
 							q_gt('quat', t_where, 0, 0, 0, "", r_accy);
 
 							var i, j = 0;
-							ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtProductno,txtProduct,txtSpec,txtUnit,txtPrice,txtMount,txtQuatno,txtNo3', b_ret.length, b_ret, 'productno,product,spec,unit,price,mount,noa,no3', 'txtProductno,txtProduct,txtSpec');
+							ret = q_gridAddRow(bbsHtm, 'tbbs', 'txtUcolor,txtProduct,txtSpec,txtUnit,txtPrice,txtMount,txtQuatno,txtNo3', b_ret.length, b_ret, 'productno,product,spec,unit,price,mount,noa,no3', 'txtUcolor,txtProduct,txtSpec');
 							/// 最後 aEmpField 不可以有【數字欄位】
 							sum();
 							bbsAssign();
@@ -334,13 +334,13 @@
 						var quat_price = 0;
 						if (as[0] != undefined) {
 							for (var i = 0; i < as.length; i++) {
-								if (as[0].productno == $('#txtProductno_' + b_seq).val())
+								if (as[0].productno == $('#txtUcolor_' + b_seq).val())
 									quat_price = dec(as[i].price);
 							}
 						}
 						t_msg = t_msg + "最近報價單價：" + quat_price + "<BR>";
 						//最新出貨單價
-						var t_where = "where=^^ custno='" + $('#txtCustno').val() + "' and noa in (select noa from vccs" + r_accy + " where productno='" + $('#txtProductno_' + b_seq).val() + "' and price>0 ) ^^ stop=1";
+						var t_where = "where=^^ custno='" + $('#txtCustno').val() + "' and noa in (select noa from vccs" + r_accy + " where productno='" + $('#txtUcolor_' + b_seq).val() + "' and price>0 ) ^^ stop=1";
 						q_gt('vcc', t_where, 0, 0, 0, "msg_vcc", r_accy);
 						break;
 					case 'msg_vcc':
@@ -348,7 +348,7 @@
 						var vcc_price = 0;
 						if (as[0] != undefined) {
 							for (var i = 0; i < as.length; i++) {
-								if (as[0].productno == $('#txtProductno_' + b_seq).val())
+								if (as[0].productno == $('#txtUcolor_' + b_seq).val())
 									vcc_price = dec(as[i].price);
 							}
 						}
@@ -364,7 +364,7 @@
 						}
 						t_msg = "庫存量：" + stkmount;
 						//平均成本
-						var t_where = "where=^^ productno ='" + $('#txtProductno_' + b_seq).val() + "' order by datea desc ^^ stop=1";
+						var t_where = "where=^^ productno ='" + $('#txtUcolor_' + b_seq).val() + "' order by datea desc ^^ stop=1";
 						q_gt('wcost', t_where, 0, 0, 0, "msg_wcost", r_accy);
 						break;
 					case 'msg_wcost':
@@ -383,7 +383,7 @@
 							q_msg($('#txtMount_' + b_seq), t_msg);
 						} else {
 							//原料成本
-							var t_where = "where=^^ productno ='" + $('#txtProductno_' + b_seq).val() + "' order by mon desc ^^ stop=1";
+							var t_where = "where=^^ productno ='" + $('#txtUcolor_' + b_seq).val() + "' order by mon desc ^^ stop=1";
 							q_gt('costs', t_where, 0, 0, 0, "msg_costs", r_accy);
 						}
 						break;
@@ -541,7 +541,7 @@
 							b_seq = t_IdSeq;
 							pop('ucc');
 						});
-						$('#txtProductno_' + j).change(function() {
+						$('#txtUcolor_' + j).change(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
@@ -571,9 +571,9 @@
 								t_IdSeq = -1;
 								q_bodyId($(this).attr('id'));
 								b_seq = t_IdSeq;
-								if (!emp($('#txtProductno_' + b_seq).val())) {
+								if (!emp($('#txtUcolor_' + b_seq).val())) {
 									//庫存
-									var t_where = "where=^^ ['" + q_date() + "','','"+$('#txtProductno_' + b_seq).val()+"')  ^^";
+									var t_where = "where=^^ ['" + q_date() + "','','"+$('#txtUcolor_' + b_seq).val()+"')  ^^";
 									q_gt('calstk', t_where, 0, 0, 0, "msg_stk", r_accy);
 								}
 							}
@@ -583,9 +583,9 @@
 								t_IdSeq = -1;
 								q_bodyId($(this).attr('id'));
 								b_seq = t_IdSeq;
-								if (!emp($('#txtProductno_' + b_seq).val())) {
+								if (!emp($('#txtUcolor_' + b_seq).val())) {
 									//金額
-									var t_where = "where=^^ noa='" + $('#txtProductno_' + b_seq).val() + "' ^^ stop=1";
+									var t_where = "where=^^ noa='" + $('#txtUcolor_' + b_seq).val() + "' ^^ stop=1";
 									q_gt('ucc', t_where, 0, 0, 0, "msg_ucc", r_accy);
 								}
 							}
@@ -602,7 +602,7 @@
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
-							t_where = "productno='" + $('#txtProductno_'+ b_seq).val() + "' and product='" + $('#txtProduct_' + b_seq).val() + "'";
+							t_where = "productno='" + $('#txtUcolor_'+ b_seq).val() + "' and product='" + $('#txtProduct_' + b_seq).val() + "'";
 							q_box("z_vccneed.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'Need', "95%", "95%", q_getMsg('lblNeed'));
 						});
 
@@ -610,7 +610,7 @@
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
-							t_where = "custno='" + $('#txtCustno').val() + "' and comp='" + $('#txtComp').val() + "' and productno='" + $('#txtProductno_' + b_seq).val() + "' and product='" + $('#txtProduct_' + b_seq).val() + "' and ordeno='"+$('#txtNoa').val()+"' and no2='"+$('#txtNo2_'+b_seq).val()+"' ";
+							t_where = "custno='" + $('#txtCustno').val() + "' and comp='" + $('#txtComp').val() + "' and productno='" + $('#txtUcolor_' + b_seq).val() + "' and product='" + $('#txtProduct_' + b_seq).val() + "' and ordeno='"+$('#txtNoa').val()+"' and no2='"+$('#txtNo2_'+b_seq).val()+"' ";
 							q_box("z_vccrecord.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'vccrecord', "95%", "95%", q_getMsg('lblRecord_s'));
 						});
 						
@@ -618,8 +618,8 @@
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
-							if (!emp($('#txtProductno_' + b_seq).val())) {
-								t_where = "noa='"+$('#txtProductno_' + b_seq).val()+"' and product='"+$('#txtProduct_' + b_seq).val()+"' ";
+							if (!emp($('#txtUcolor_' + b_seq).val())) {
+								t_where = "noa='"+$('#txtUcolor_' + b_seq).val()+"' and product='"+$('#txtProduct_' + b_seq).val()+"' ";
 								q_box("z_scheduled.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'scheduled', "95%", "95%", q_getMsg('PopScheduled'));
 							}
 						});
@@ -628,7 +628,7 @@
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
-							t_where = "title='本期訂單' and bdate='"+q_cdn(q_date(),-61)+"' and edate='"+q_cdn(q_date(),+61)+"' and noa='"+$('#txtProductno_' + b_seq).val()+"' and product='"+$('#txtProduct_' + b_seq).val()+"' ";
+							t_where = "title='本期訂單' and bdate='"+q_cdn(q_date(),-61)+"' and edate='"+q_cdn(q_date(),+61)+"' and noa='"+$('#txtUcolor_' + b_seq).val()+"' and product='"+$('#txtProduct_' + b_seq).val()+"' ";
 							q_box("z_workgorde.aspx?" + r_userno + ";" + r_name + ";" + q_time + ";" + t_where, 'scheduled', "95%", "95%", q_getMsg('PopScheduled'));
 						});
 						
@@ -682,7 +682,7 @@
 							b_seq = t_IdSeq;
 						});
 						
-						$('#txtUcolor_'+i).change(function() {
+						$('#txtProductno_'+i).change(function() {
 							t_IdSeq = -1;
 							q_bodyId($(this).attr('id'));
 							b_seq = t_IdSeq;
@@ -885,7 +885,7 @@
 					case 'txtStyle_':
 						getTheory(b_seq);
 						break;
-					case 'txtUcolor_':
+					case 'txtProductno_':
 						getTheory(b_seq);
 						break;
 				}
@@ -901,7 +901,7 @@
                 t_Mount = dec($('#txtMount_' + b_seq).val());
                 t_Style = $('#txtStyle_' + b_seq).val();
                 t_Stype = ($('#cmbStype').find("option:selected").text() == '外銷' ? 1 : 0);
-                t_Productno = $('#txtUcolor_' + b_seq).val();
+                t_Productno = $('#txtProductno_' + b_seq).val();
                 var theory_setting={
                     calc:StyleList,
                     ucc:t_uccArray,
@@ -1197,10 +1197,10 @@
 					<td align="center" style="width:45px;">
 						<input class="btn" id="btnPlus" type="button" value='＋' style="font-weight: bold;" />
 					</td>
-					<td align="center" style="width:160px;"><a id='lblProductno_na_s'>品號</a></td>
+					<td align="center" style="width:160px;"><a id='lblUcolor_na_s'>品號</a></td>
 					<td align="center" style="width:85px;"><a id='lblStyle_na_s'>型</a></td>
 					<td align="center" style="width:200px;"><a id='lblProduct_na_s'>品名/規格</a></td>
-					<td align="center" style="width:125px;"><a id='lblUcolor_s'>材質</a></td>
+					<td align="center" style="width:125px;"><a id='lblProductno_s'>材質</a></td>
 					<td align="center" style="width:85px;"><a id='lblRadius_na_s'>短徑</a></td>
 					<td align="center" style="width:85px;"><a id='lblWidth_na_s'>長徑</a></td>
 					<td align="center" style="width:85px;"><a id='lblDime_na_s'>厚度</a></td>
@@ -1229,8 +1229,8 @@
 						<input class="btn" id="btnMinus.*" type="button" value='－' style=" font-weight: bold;" />
 					</td>
 					<td align="center">
-						<input class="txt c6" id="txtProductno.*" maxlength='30'type="text" style="width:98%;" />
-						<input class="btn" id="btnProduct.*" type="button" value='.' style=" font-weight: bold;" />
+						<input class="txt c6" id="txtUcolor.*" maxlength='30'type="text" style="width:98%;" />
+						<input class="btn" id="btnUcolor.*" type="button" value='.' style=" font-weight: bold;" />
 						<input class="txt c6" id="txtNo2.*" type="text" />
 					</td>
 					<td>
@@ -1242,7 +1242,7 @@
 						<input class="txt c7" id="txtSpec.*" type="text" />
 					</td>
 					<td>
-						<input class="txt c7" id="txtUcolor.*" type="text" style="width: 70%;"/>
+						<input class="txt c7" id="txtProductno.*" type="text" style="width: 70%;"/>
 						<input class="btn" id="btnProduct2.*" type="button" value='.' style=" font-weight: bold;" />
 						<input class="txt c7" id="txtScolor.*" type="text" />
 					</td>

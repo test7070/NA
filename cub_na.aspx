@@ -611,7 +611,7 @@
 								$('#txtComp').val(b_ret[0].comp);
 								$('#txtOrdeno').val(b_ret[0].noa);
 								$('#txtNo2').val(b_ret[0].no2);
-								$('#txtProductno').val(b_ret[0].productno);
+								$('#txtProductno').val(b_ret[0].ucolor);
 								$('#txtProduct').val(b_ret[0].product);
 								$('#txtSpec').val(b_ret[0].spec);
 								$('#txtMount').val(b_ret[0].mount);
@@ -619,7 +619,7 @@
 								$('#txtItype').val(b_ret[0].stype);
 								$('#txtMemo').val(b_ret[0].memo);
 								$('#txtMedate').val(b_ret[0].datea);
-								$('#txtM1').val(b_ret[0].ucolor);
+								$('#txtM1').val(b_ret[0].productno);
 								$('#txtM2').val(b_ret[0].scolor);
 								$('#txtM3').val(b_ret[0].radius);
 								$('#txtM4').val(b_ret[0].width);
