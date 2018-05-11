@@ -29,7 +29,7 @@ set @tweight=cast(@weight as nvarchar(50))
 
 EXEC("
 	update cubs"+@accy+"
-	set mount="+@tmount+",weight="+@tweight+",wmount="+@tput+"
+	set mount=round(mount+"+@tmount+",0),weight=round(weight+"+@tweight+",4),wmount=round(wmount+"+@tput+",0)
 	where noa='"+@noa+"' and noq='"+@noq+"'
 ")
 

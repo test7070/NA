@@ -64,6 +64,9 @@
 				});
 				
 				$('#btnCubt').click(function() {
+					var t_key = q_getHref();
+					var t_noa=t_key[1];
+					
 					if(q_cur==1 || q_cur==2){
 						var t_ucolor=Parent.$('#txtProductno').val();
 						var t_style=Parent.$('#txtM7').val();
@@ -83,7 +86,7 @@
 							$('#btnMinus_'+j).click();
 						}
 						
-						while(q_bbsCount<cubBBtArray){
+						while(q_bbsCount<cubBBtArray.length){
 							$('#btnPlus').click();
 						}
 						
@@ -96,7 +99,25 @@
 								var tgmount=dec(cubBBtArray[j].gmount);
 								var tuno=cubBBtArray[j].uno;
 								if(tuno.length>0){
-									$('#txtUno_'+j).val(tuno+'-'+('00'+(j+1).toString()).slice(-2));
+									var t_mxuno='';
+									q_gt('view_uccb', "where=^^ uno=(select MAX(uno) from view_uccb where uno like '"+tuno+"-%' and noa!='"+t_noa+"') ^^", 0, 0, 0, "getuno",r_accy,1);
+									var as = _q_appendData("view_uccb", "", true);
+									if(as[0]!=undefined){
+										t_mxuno=as[0].uno;	
+									}
+									//檢查表身是否已被指定
+									for (var n = 0; n < q_bbsCount; n++) {
+										if($('#txtUno_'+n).val().indexOf(tuno+'-')>-1 && $('#txtUno_'+n).val()>t_mxuno){
+											t_mxuno=$('#txtUno_'+n).val();
+										}
+									}
+									if(t_mxuno.length>0){
+										var t_num=dec(t_mxuno.substr(t_mxuno.indexOf('-')+1));
+										t_num++;
+										$('#txtUno_'+j).val(tuno+'-'+('00'+t_num.toString()).slice(-2));
+									}else{
+										$('#txtUno_'+j).val(tuno+'-01');
+									}
 								}else if (tuno.length==0 && tgmount!=0){
 									q_func('qtxt.query.getuno_bydate', 'uno.txt,getuno_bydate,'+ encodeURI(replaceAll(t_datea,'/',''))+';'+encodeURI('#non')+';'+encodeURI('#non')+';'+encodeURI('#non'),r_accy,1);
 									var as = _q_appendData("tmp0", "", true, true);
