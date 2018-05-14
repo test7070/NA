@@ -950,7 +950,7 @@
 									if(t_mount>0){
 										var t_uweight=round(q_div(t_weight,t_mount),4);
 										var t_gmount=dec($('#txtGmount__'+b_seq).val());
-										$('#txtGweight__'+b_seq).val(round(q_mul(t_gmount,t_gmount),4));
+										$('#txtGweight__'+b_seq).val(round(q_mul(t_gmount,t_uweight),4));
 									}
 									
 								}else{
