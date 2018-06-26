@@ -35,4 +35,328 @@ EXEC("
 
 select top 1 * from view_cubs where noa=@noa and noq=@noq
 ;
------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+cubtstk:--cubtstk
+SET QUOTED_IDENTIFIER OFF
+declare @edate nvarchar(MAX)=case when '#non'=[1] then char(255) else [1] end
+declare @bpno nvarchar(MAX)=case when '#non'=[2] then '' else [2] end --產品編號
+declare @epno nvarchar(MAX)=case when '#non'=[3] then char(255) else [3] end --產品編號
+declare @bsno nvarchar(MAX)=case when '#non'=[4] then '' else [4] end --倉庫編號
+declare @esno nvarchar(MAX)=case when '#non'=[5] then char(255) else [5] end --倉庫編號
+declare @noa nvarchar(MAX)=case when '#non'=[6] then '' else [6] end --排除單號
+declare @uccuca nvarchar(MAX)=case when '#non'=[7] then '' else [7] end --選擇只要的資料 (空白)全部,'1' ucc,'2'uca
+declare @cmd nvarchar(max) = ''
+
+IF OBJECT_ID('tempdb..#stktmp')is not null
+BEGIN
+	set @cmd = 'drop table #stktmp'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#stktmps')is not null
+BEGIN
+	set @cmd = 'drop table #stktmps'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#stktmpo')is not null
+BEGIN
+	set @cmd = 'drop table #stktmpo'
+	EXECUTE sp_executesql @cmd
+END
+
+create table #stktmps(
+		typea int,--0表示盤點
+		datea nvarchar(50),
+		storeno nvarchar(80),
+		productno nvarchar(100),
+		mount float,
+		weight float
+)
+
+insert into #stktmps(typea,datea,storeno,productno,mount,weight)
+select '1',isnull(a.datea,''),isnull(a.storeno,''),isnull(a.productno,''),sum(cast(mount as decimal(38,6))) mount,sum(cast(weight as decimal(38,6))) weight
+from (
+	select isnull(a.datea,'') datea,isnull(b.storeno,'') storeno,isnull(b.productno,'') productno,
+	((case when a.typea='1' then 1 else -1 end)*(case when isnull(b.gmount,0)!=0 then isnull(b.gmount,0) else isnull(b.mount,0) end))*(-1) mount,
+	((case when a.typea='1' then 1 else -1 end)*(case when isnull(b.gweight,0)!=0 then isnull(b.gweight,0) else isnull(b.weight,0) end))*(-1) weight
+	from view_vcc a left join view_vccs b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+	
+	union all
+	select isnull(a.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,'') productno,
+	((case when a.typea='1' then 1 else -1 end)*isnull(b.mount,0)) mount,
+	((case when a.typea='1' then 1 else -1 end)*isnull(b.weight,0)) weight
+	from view_rc2 a left join view_rc2s b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+	
+	union all
+	select isnull(a.datea,''),isnull(a.storeno,'') storeno,isnull(b.productno,'') productno,
+	(isnull(b.mount,0)) mount,(isnull(b.weight,0)) weight
+	from view_ina a left join view_inas b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(a.storeno,'') between @bsno and @esno)
+	
+	union all
+	select isnull(a.datea,''),isnull(a.storeno,'') storeno,isnull(b.productno,'') productno,
+	(isnull(b.mount,0))*(-1) mount,(isnull(b.weight,0))*(-1) weight
+	from view_get a left join view_gets b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(a.storeno,'') between @bsno and @esno)
+			
+	union all
+	select isnull(a.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,'') productno,
+	((case when a.typea='1' then 1 else -1 end)*isnull(b.mount,0))*(-1) mount,
+	((case when a.typea='1' then 1 else -1 end)*isnull(b.weight,0))*(-1) weight
+	from view_worka a left join view_workas b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+			
+	union all
+	select isnull(a.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,'') productno,
+	(isnull(b.mount,0)) mount,(isnull(b.weight,0)) weight
+	from view_workb a left join view_workbs b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+			
+	union all
+	select isnull(a.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,'') productno,
+	((case when a.typea='1' then 1 else -1 end)*isnull(b.mount,0))*(-1) mount,
+	((case when a.typea='1' then 1 else -1 end)*isnull(b.weight,0))*(-1) weight
+	from view_workc a
+	left join view_workcs b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+			
+	union all
+	select isnull(a.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,'') productno,
+	((case when a.typea='1' then 1 else -1 end)*(isnull(b.mount,0)+isnull(b.inmount,0)-isnull(b.outmount,0))) mount,
+	((case when a.typea='1' then 1 else -1 end)*isnull(b.weight,0)) weight
+	from view_workd a left join view_workds b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+	
+	union all
+	select isnull(a.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,'') productno,
+	(isnull(b.mount,0)) mount,(isnull(b.weight,0)) weight
+	from view_cut a left join view_cuts b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+	
+	union all
+	select isnull(a.datea,''),isnull(a.storeno,'') storeno,isnull(a.productno,'') productno,
+	(isnull(a.gmount,0))*(-1) mount,(isnull(a.gweight,0))*(-1) weight
+	from view_cut a
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(a.productno,'') between @bpno and @epno) 
+	and (isnull(a.storeno,'') between @bsno and @esno)
+	
+	union all
+	select isnull(a.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,'') productno,
+	(isnull(b.mount,0)) mount,(isnull(b.weight,0)) weight
+	from view_cub a left join view_cubu b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+			
+	union all
+	select isnull(a.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,'') productno,
+	(isnull(b.gmount,0))*(-1) mount,(isnull(b.gweight,0))*(-1) weight
+	from view_cub a left join view_cubt b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+	
+	union all	
+	select isnull(a.datea,''),isnull(a.storeno,'') storeno,isnull(b.productno,'') productno,
+	(isnull(b.mount,0))*(-1) mount,(isnull(b.weight,0))*(-1) weight
+	from view_cng a left join view_cngs b on a.noa=b.noa
+	where (a.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(a.storeno,'') between @bsno and @esno)
+	
+	union all
+	select isnull(a.datea,''),isnull(a.storeinno,'') storeno,isnull(b.productno,''),
+	(isnull(b.mount,0)) mount,(isnull(b.weight,0)) weight
+	from view_cng a left join view_cngs b on a.noa=b.noa
+	where (a.datea<= @edate)and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(a.storeinno,'') between @bsno and @esno)
+			
+	union all
+	select isnull(b.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,''),
+	(isnull(b.mount,0)) mount,(isnull(b.weight,0)) weight
+	from vcf a left join vcfs b on a.noa=b.noa
+	where (b.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+	
+	union all
+	select isnull(b.datea,''),isnull(b.storeno,'') storeno,isnull(b.productno,''),
+	(isnull(b.mount,0))*(-1) mount,(isnull(b.weight,0))*(-1) weight
+	from vcf a left join vcft b on a.noa=b.noa
+	where (b.datea<= @edate) and a.noa!=@noa
+	and (isnull(b.productno,'') between @bpno and @epno) 
+	and (isnull(b.storeno,'') between @bsno and @esno)
+			
+) a group by isnull(a.datea,''),isnull(a.storeno,''),isnull(a.productno,'')
+
+insert #stktmps
+select '0',isnull(a.datea,''),isnull(a.storeno,''),isnull(a.productno,''),isnull(a.mount,0),isnull(a.weight,0) 
+from view_ucces a 
+left join (select MAX(datea)mdate,MAX(noa)noa,storeno,productno from view_ucces where datea<= @edate group by storeno,productno) b 
+on a.storeno=b.storeno and a.productno=b.productno 
+where a.datea<= @edate and a.datea=b.mdate  and a.noa!=@noa
+and (isnull(a.productno,'') between @bpno and @epno) 
+and (isnull(a.storeno,'') between @bsno and @esno)
+
+CREATE INDEX tmpindex on #stktmps (storeno,productno,datea)
+
+delete a from #stktmps a
+where datea<(select MAX(datea) from #stktmps where typea='0' and storeno=a.storeno and productno=a.productno)
+
+----------------------------------------------------------------------------------------------------------------------
+create table #stktmpo(
+	gno nvarchar(100),
+	productno nvarchar(100),
+	ordemount float,--訂單數量
+	ordeweight float,--訂單重量
+	ordedate nvarchar(50),--訂單預交日
+	ordcmount float,--訂單數量
+	ordcweight float,--訂單重量
+	ordctrandate nvarchar(50),--採購預交日
+)
+
+insert #stktmpo(gno,productno,ordemount,ordeweight,ordedate)
+select '0',productno,isnull(b.mount,0)-isnull(c.vmount,0)
+,isnull(b.weight,0)-isnull(c.vweight,0),isnull(b.datea,'')
+from view_orde a left join view_ordes b on a.noa=b.noa
+outer apply (select 
+sum(((case when va.typea='1' then 1 else -1 end)*(case when isnull(vb.gmount,0)!=0 then isnull(vb.gmount,0) else isnull(vb.mount,0) end))) vmount,
+sum(((case when va.typea='1' then 1 else -1 end)*(case when isnull(vb.gweight,0)!=0 then isnull(vb.gweight,0) else isnull(vb.weight,0) end))) vweight
+from view_vcc va left join view_vccs vb on va.noa=vb.noa where vb.ordeno=a.noa and vb.no2=b.no2)c
+where isnull(a.enda,0)!=1 and isnull(a.cancel,0)!=1
+and isnull(b.enda,0)!=1 and isnull(b.cancel,0)!=1
+and (isnull(b.mount,0)-isnull(c.vmount,0)!=0 or isnull(b.weight,0)-isnull(c.vweight,0)!=0)
+and (isnull(b.productno,'') between @bpno and @epno) 
+
+insert #stktmpo(gno,productno,ordcmount,ordcweight,ordctrandate)
+select '0',productno,isnull(b.mount,0)-isnull(c.rmount,0)
+,isnull(b.weight,0)-isnull(c.rweight,0),isnull(b.trandate,'')
+from view_ordc a left join view_ordcs b on a.noa=b.noa
+outer apply (select 
+sum((case when ra.typea='1' then 1 else -1 end)*(isnull(rb.mount,0))) rmount,
+sum((case when ra.typea='1' then 1 else -1 end)*(isnull(rb.weight,0))) rweight
+from view_rc2 ra left join view_rc2s rb on ra.noa=rb.noa where rb.ordeno=a.noa and rb.no2=b.no2)c
+where isnull(a.enda,0)!=1 and isnull(a.cancel,0)!=1
+and isnull(b.enda,0)!=1 and isnull(b.cancel,0)!=1
+and ((isnull(b.mount,0)-isnull(c.rmount,0)!=0 or isnull(b.weight,0)-isnull(c.rweight,0)!=0))
+and (isnull(b.productno,'') between @bpno and @epno) 
+
+insert #stktmpo(gno,productno,ordemount,ordeweight,ordedate,ordcmount,ordcweight,ordctrandate)
+select '1',productno,sum(ordemount),sum(ordeweight),MIN(ordedate),sum(ordcmount),sum(ordcweight),MIN(ordctrandate)
+from #stktmpo group by productno
+
+delete #stktmpo where gno='0'
+----------------------------------------------------------------------------------------------------------------------
+create table #stktmp(
+	storeno nvarchar(80),
+	store nvarchar(255),
+	productno nvarchar(100),
+	product nvarchar(MAX),
+	spec nvarchar(MAX),
+	style nvarchar(MAX),
+	unit nvarchar(MAX),
+	mount float, --庫存數量
+	weight float, --庫存重量
+	safemount float, --安全存量
+	ordemount float,--訂單數量
+	ordeweight float,--訂單重量
+	ordedate nvarchar(50),--訂單預交日
+	ordcmount float,--訂單數量
+	ordcweight float,--訂單重量
+	ordctrandate nvarchar(50),--採購預交日
+	usemount float,--可用庫存數量
+	useweight float,--可用庫存重量
+)
+CREATE INDEX tmpindex on #stktmp (storeno,productno)
+
+insert #stktmp(storeno,store,productno,product,spec,style,unit,mount,weight,safemount)
+select a.storeno,MAX(isnull(c.store,'')),a.productno,MAX(isnull(b.product,''))
+,MAX(isnull(b.spec,'')),MAX(isnull(b.style,'')),MAX(isnull(b.unit,''))
+,sum(a.mount ) mount,sum(a.weight) weight
+,MAX(isnull(b.safemount,''))
+from #stktmps a left join view_ucaucc b on a.productno=b.noa left join store c on a.storeno=c.noa
+where b.noa is not null
+and (exists (select * from ucc where noa=a.productno) or len(@uccuca)=0 or @uccuca!='1')
+and (exists (select * from uca where noa=a.productno) or len(@uccuca)=0 or @uccuca!='2')
+group by a.productno,a.storeno
+order by a.productno,a.storeno
+
+delete #stktmp where mount=0 and weight=0
+
+update a
+set ordemount=isnull(b.ordemount,0)
+,ordeweight=isnull(b.ordeweight,0)
+,ordedate=isnull(b.ordedate,'')
+,ordcmount=isnull(b.ordcmount,0)
+,ordcweight=isnull(b.ordcweight,0)
+,ordctrandate=isnull(b.ordctrandate,'')
+from #stktmp a left join #stktmpo b on a.productno=b.productno
+where b.productno is not null
+
+insert #stktmp(storeno,store,productno,product,spec,style,unit,mount,weight,safemount
+,ordemount,ordeweight,ordedate,ordcmount,ordcweight,ordctrandate)
+select '','',a.productno,isnull(b.product,''),isnull(b.spec,''),isnull(b.style,''),isnull(b.unit,'')
+,0,0,isnull(b.safemount,0),isnull(a.ordemount,0),isnull(a.ordeweight,0),isnull(a.ordedate,'')
+,isnull(a.ordcmount,0),isnull(a.ordcweight,0),isnull(a.ordctrandate,'')
+from #stktmpo a  left join view_ucaucc b on a.productno=b.noa
+where b.noa is not null
+and  not exists (select * from #stktmp where productno=a.productno)
+and (exists (select * from ucc where noa=a.productno) or len(@uccuca)=0 or @uccuca!='1')
+and (exists (select * from uca where noa=a.productno) or len(@uccuca)=0 or @uccuca!='2')
+
+update #stktmp
+set ordemount=isnull(ordemount,0)
+,ordeweight=isnull(ordeweight,0)
+,ordedate=isnull(ordedate,'')
+,ordcmount=isnull(ordcmount,0)
+,ordcweight=isnull(ordcweight,0)
+,ordctrandate=isnull(ordctrandate,'')
+
+update #stktmp
+set usemount=mount-ordemount+ordcmount
+,useweight=weight-ordeweight+ordcweight
+
+select * from #stktmp
+order by storeno,productno
+
+IF OBJECT_ID('tempdb..#stktmpo')is not null
+BEGIN
+	set @cmd = 'drop table #stktmpo'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#stktmps')is not null
+BEGIN
+	set @cmd = 'drop table #stktmps'
+	EXECUTE sp_executesql @cmd
+END
+
+IF OBJECT_ID('tempdb..#stktmp')is not null
+BEGIN
+	set @cmd = 'drop table #stktmp'
+	EXECUTE sp_executesql @cmd
+END
+;

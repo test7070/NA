@@ -911,6 +911,12 @@
 				for (var i = 0; i < q_bbtCount; i++) {
 					$('#lblNo__' + i).text(i + 1);
 					if (!$('#btnMinut__' + i).hasClass('isAssign')) {
+						$('#txtProductno__'+i).change(function() {
+							t_IdSeq = -1;
+                            q_bodyId($(this).attr('id'));
+                            b_seq = t_IdSeq;
+						});
+						
 						$('#txtUno__'+i).change(function() {
 							t_IdSeq = -1;
                             q_bodyId($(this).attr('id'));
@@ -957,6 +963,75 @@
 									alert('【'+t_uno+'】+批號不存在');
 								}
 							}
+						})
+						
+						$('#btnStk__'+i).click(function() {
+							t_IdSeq = -1;
+                            q_bodyId($(this).attr('id'));
+                            b_seq = t_IdSeq;
+							
+							var t_pno=$.trim($('#txtProductno__'+b_seq).val());
+							var t_sno=$.trim($('#txtStoreno__'+b_seq).val());
+							var t_date=$.trim($('#txtDatea').val());
+							var t_noa=$.trim($('#txtNoa').val());
+							if(t_sno.length==0){t_sno='#non';}
+							if(t_date.length==0){t_date='#non';}
+							if(t_noa.length==0){t_noa='#non';}
+							
+							if(t_pno.length>0){
+								q_func('qtxt.query.cubtstk', 'cub_na.txt,cubtstk,'+t_date+';'+t_pno+';'+t_pno+';'+t_sno
+								+';'+t_sno+';'+t_noa+';#non;',r_accy,1);
+								var as = _q_appendData("tmp0", "", true, true);
+								var t_msg='';
+                				if (as[0] != undefined) {
+                					//訂單量 庫存量  採購量 採購預交日 可用庫存量
+                					var t_omount=0,t_oweight=0;
+                					var t_mount=0,t_weight=0;
+                					var t_cmount=0,t_cweight=0,t_cdate='';
+                					var t_umount=0,t_uweight=0;
+									for(var i=0;i<as.length;i++){
+										t_omount=dec(as[i].ordemount);
+										t_oweight=dec(as[i].ordeweight);
+										t_mount=q_add(t_mount,dec(as[i].mount));
+										t_weight=q_add(t_weight,dec(as[i].weight));
+										t_cmount=dec(as[i].ordcmount);
+										t_cweight=dec(as[i].ordcweight);
+										t_cdate=as[i].ordctrandate;
+									}
+									t_omount=round(t_omount,6)
+									t_oweight=round(t_oweight,6)
+									t_mount=round(t_mount,6)
+									t_weight=round(t_weight,6)
+									t_cmount=round(t_cmount,6)
+									t_cweight=round(t_cweight,6)
+									t_umount=round(q_add(q_sub(t_mount,t_omount),t_cmount),6);
+									t_uweight=round(q_add(q_sub(t_weight,t_oweight),t_cweight),6);
+									
+									if(t_umount<0){t_umount=0;}
+									if(t_uweight<0){t_uweight=0;}
+									
+									t_msg='訂單數量/重量： '+t_omount.toString()+' / '+t_oweight.toString()+'<BR>';
+									t_msg+='庫存數量/重量： '+t_mount.toString()+' / '+t_weight.toString()+'<BR>';
+									t_msg+='採購數量/重量： '+t_cmount.toString()+' / '+t_cweight.toString()+'<BR>';
+									t_msg+='採購預交日： '+t_cdate+'<BR>';
+									t_msg+='可用庫存數量/重量： '+t_umount.toString()+' / '+t_uweight+'<BR>';
+									$('#div_msg').html('<div style="margin: 5px;width:250px;">'+t_msg+'</div>');
+									if(window.document.body.scrollHeight-($(this).offset().top+dec($(this).css('height')))-dec($('#div_msg').css('height'))>0){
+										$('#div_msg').css('top',$(this).offset().top+dec($(this).css('height')));
+									}else{
+										$('#div_msg').css('top',$(this).offset().top-dec($(this).css('height'))-dec($('#div_msg').css('height')));
+									}
+									$('#div_msg').css('left',$(this).offset().left-dec($(this).css('width'))-dec($('#div_msg').css('width')));
+									$('#div_msg').show();
+								}else{
+									$('#div_msg').html('');
+									$('#div_msg').hide();
+								}
+							}
+							
+						}).focusout(function() {
+							$('#div_msg').html('');
+							$('#div_msg').hide();
 						});
 					}
 				}
@@ -1193,7 +1268,7 @@
 				font-size: medium;
 			}
 			#dbbt {
-				width: 1260px;
+				width: 1300px;
 			}
 			#tbbt {
 				margin: 0;
@@ -1220,6 +1295,7 @@
 	ondragover="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
 	ondrop="event.dataTransfer.dropEffect='none';event.stopPropagation(); event.preventDefault();"
 	>
+		<div id="div_msg" style="position:absolute; top:0px; left:0px; display:none;background: lemonchiffon;border: 1px solid #1a1a1a;"> </div>
 		<div id="div_cugt" style="position:absolute; top:0px; left:0px; display:none; width:510px; background-color: #CDFFCE; border: 5px solid gray;">
 			<table id="table_cugt" style="width:100%;" border="1" cellpadding='2' cellspacing='0'>
 				<tr>
@@ -1665,6 +1741,7 @@
 					<td style="width:80px; text-align: center;"><a id="lblHard_na">下料/把</a></td>
 					<td style="width:120px; text-align: center;">領料倉</td>
 					<td style="width:140px; text-align: center;">備註</td>
+					<td style="width:40px; text-align: center;">庫存</td>
 				</tr>
 				<tr>
 					<td>
@@ -1695,6 +1772,7 @@
 						<input id="txtStore..*" type="text" class="txt c1" style="width: 45%"/>
 					</td>
 					<td><input id="txtMemo..*" type="text" class="txt c1"/></td>
+					<td><input id="btnStk..*" type="button" class="txt" value="."/></td>
 				</tr>
 			</table>
 		</div>
